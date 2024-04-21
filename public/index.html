@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Social Working Club</title>
+    
+    <!-- Logo -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   </head>
+    <body>
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <!-- titre + logo de la sidebar -->
+            <div class="logo-details">
+                <i class='bx bxl-c-plus-plus icon'></i>
+                    <div class="logo_name"><?pseudo></div>
+                    <i class='bx bx-menu' id="btn" ></i>
+            </div>
+            <!-- sidebar list -->
+            <ul class="nav-list">
+            <li>
+                <i class='bx bx-search'></i>
+                <input type="text" placeholder="Search...">
+                <span class="tooltip">Search</span>
+            </li>
+
+            <li>
+                <a href="index.html">
+                  <i class='bx bx-grid-alt'></i>
+                  <span class="links_name">Home</span>
+                </a>
+                 <span class="tooltip">Home</span>
+            </li>
+            <!-- profil des users -->
+            <li>
+                <a href="create_account.html">
+                <i class='bx bx-user'></i>
+                <span class="links_name">Profil</span>
+            </a>
+            <span class="tooltip">Profil</span>
+            <!-- messages privés -->
+            </li>
+            <li>
+                <a href="#">
+                <i class='bx bx-chat'></i>
+                <span class="links_name">Messages</span>
+            </a>
+            <span class="tooltip">Messages</span>
+            </li>
+            <!-- paramètre -->
+            <li>
+                <a href="#">
+                <i class='bx bx-cog'></i>
+                <span class="links_name">Settings</span>
+            </a>
+            <span class="tooltip">Settings</span>
+            </li>
+            <!-- profil -->
+            <li class="profile">
+                <div class="profile-details">
+                    <img src="profile.jpg" alt="profileImg">
+                    <div class="name_job">
+                        <div class="name"><?pseudo></div>
+                    </div>
+                </div>
+                <!-- déconnexion compte -->
+                <i class='bx bx-log-out' id="log_out"></i>
+            </li>
+            </ul>
+        </div>
+    <!-- TITRE -->
+    <section class="home-section">
+        <div class="text">Social Working Club</div>
+
+        <!-- création de post -->
+        <div class="create-post">
+            <form id="createPostForm">
+                <div class="input-group">
+                    <textarea id="postContent" placeholder="Ecrivez quelque chose..." rows="2"></textarea>
+                </div>
+                <div class="file-upload-btns">
+                    <label for="postImage" class="file-upload-label">Photo/vidéo</label>
+                    <input type="file" id="postImage" accept="image/*" class="file-upload-input">
+                <button type="submit" class="submit-post">Publier</button>
+                </div>
+            </form>
+        </div>
+
+
+
+
+        <article class="posts">
+            <div class="post">
+                <div class="user-info">
+                    <img src="profile1" alt="profile_pic" class="profile-pic">
+                    <span class="username">Username</span>
+                </div>
+                <p class="message">Ceci est un simple texte.</p>
+                <img src="sample-image.jpg" alt="sample_image">
+                <div class="post-action">
+                    <img src="/img/like.png" class="like">J'aime</img>
+                    <img src="/img/chat.png" class="comment">Commenter</img>
+                    <img src="/img/send.png" class="share">Partager</img>
+                </div>
+            </div>
+
+
+            <div class="post">
+                <div class="user-info">
+                    <img src="profile1" alt="profile_pic" class="profile-pic">
+                    <span class="username">Username</span>
+                </div>
+                <p class="message">Ceci est un simple texte.</p>
+                <img src="sample-image.jpg" alt="sample_image">
+                <div class="post-action">
+                    <img src="/img/like.png" class="like">J'aime</img>
+                    <img src="/img/chat.png" class="comment">Commenter</img>
+                    <img src="/img/send.png" class="share">Partager</img>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="user-info">
+                    <img src="profile1" alt="profile_pic" class="profile-pic">
+                    <span class="username">Username</span>
+                </div>
+                <p class="message">Ceci est un simple texte.</p>
+                <img src="sample-image.jpg" alt="sample_image">
+                <div class="post-action">
+                    <img src="/img/like.png" class="like">J'aime</img>
+                    <img src="/img/chat.png" class="comment">Commenter</img>
+                    <img src="/img/send.png" class="share">Partager</img>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="user-info">
+                    <img src="profile1" alt="profile_pic" class="profile-pic">
+                    <span class="username">Username</span>
+                </div>
+                <p class="message">Ceci est un simple texte.</p>
+                <img src="sample-image.jpg" alt="sample_image">
+                <div class="post-action">
+                    <img src="/img/like.png" class="like">J'aime</img>
+                    <img src="/img/chat.png" class="comment">Commenter</img>
+                    <img src="/img/send.png" class="share">Partager</img>
+                </div>
+            </div>
+
+        </article>
+    </section>
+
+    <script defer>
+        let sidebar = document.querySelector(".sidebar");
+        let closeBtn = document.querySelector("#btn");
+        let searchBtn = document.querySelector(".bx-search");
+
+        closeBtn.addEventListener("click", ()=>{
+            sidebar.classList.toggle("open");
+            menuBtnChange();//calling the function(optional)
+        });
+
+        searchBtn.addEventListener("click", ()=>{ // Sidebar open when you click on the search iocn
+            sidebar.classList.toggle("open");
+            menuBtnChange(); //calling the function(optional)
+        });
+
+        // following are the code to change sidebar img(optional)
+        function menuBtnChange() {
+        if(sidebar.classList.contains("open")){
+            closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");//replacing the iocns class
+        }else {
+            closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the iocns class
+        }
+        }
+
+        // boutons like, share et partage => fonctionnement au click
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('.like').forEach(img => {
+                img.addEventListener('click', () => alert('Vous avez aimez ce post'));
+            });
+            document.querySelectorAll('.comment').forEach(img => {
+                img.addEventListener('click', () => alert('Commentaire ajouté'));
+            });
+            document.querySelectorAll('.share').forEach(img => {
+                img.addEventListener('click', () => alert('Post envoyé'))
+            })
+        })
+
+        document.getElementById('createPostForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêcher le rechargement de la page
+        
+            const postContent = document.getElementById('postContent').value;
+            const postImage = document.getElementById('postImage').files[0];
+        
+            const reader = new FileReader();
+        
+            reader.onload = function(e) {
+                const postsContainer = document.querySelector('.posts');
+                const newPostHtml = `
+                    <div class="post">
+                        <div class="user-info">
+                            <img src="profile.jpg" alt="profile_pic" class="profile-pic">
+                            <span class="username">Nom d'utilisateur</span>
+                        </div>
+                        <p class="message">${postContent}</p>
+                        ${postImage ? `<img src="${e.target.result}" alt="post_image">` : ''}
+                        <div class="post-action">
+                            <img src="like.png" class="like">J'aime</img>
+                            <img src="chat.png" class="comment">Commenter</img>
+                            <img src="send.png" class="share">Partager</img>
+                        </div>
+                    </div>
+                `;
+                postsContainer.insertAdjacentHTML('afterbegin', newPostHtml); // Ajouter la publication en tête de liste
+            };
+        
+            if (postImage) {
+                reader.readAsDataURL(postImage);
+            } else {
+                reader.onload();
+            }
+        
+            // Réinitialiser le formulaire
+            document.getElementById('createPostForm').reset();
+        });        
+    </script>
+</body>
+</html>
