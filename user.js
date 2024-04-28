@@ -3,8 +3,13 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10; // C'est le facteur de coût pour le hashage
 
 const userSchema = new mongoose.Schema({
-    // ... vos autres champs
+    fullname: String, 
+    email: String,
     password: { type: String, required: true },
+    verified: { type: Boolean, default: false }, // Ajouté pour la vérification de l'email
+    verificationToken: { type: String }, // Ajouté pour stocker le token de vérification
+    profileImage: String,
+    bio: String
 });
 
 // Avant d'enregistrer l'utilisateur, hashons le mot de passe

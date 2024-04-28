@@ -132,21 +132,25 @@
             var password = document.getElementById('password').value;
             var confirmPassword = document.getElementById('confirm-password').value;
         
-            if(password === confirmPassword) {
-                // Envoi des données au serveur
+            if (password === confirmPassword) {
+                // Envoi des données au serveur si les mots de passe correspondent
                 fetch('/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ fullname: fullname, email: email, password: password })
+                    body: JSON.stringify({
+                        fullname: fullname,
+                        email: email,
+                        password: password
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Afficher une page ou une modale indiquant à l'utilisateur de vérifier son email
-                    window.location.href = '/email-verification.html'; // Rediriger vers la page de vérification par e-mail
+                    // Logique de traitement après la réponse du serveur
+                    window.location.href = '/email-verification.html'; // Redirection après inscription
                 })
-                .catch((error) => {
+                .catch(error => {
                     console.error('Erreur:', error);
                 });
             } else {
