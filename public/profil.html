@@ -14,8 +14,8 @@
     <div class="sidebar">
         <!-- titre + logo de la sidebar -->
         <div class="logo-details">
-            <i class='bx bxl-c-plus-plus icon'></i>
-                <div class="logo_name">pseudo</div>
+            <!-- <i class='bx bxl-c-plus-plus icon'></i>
+                <div class="logo_name">pseudo</div> -->
                 <i class='bx bx-menu' id="btn" ></i>
         </div>
         <!-- sidebar list -->
@@ -51,7 +51,7 @@
         </li>
         <!-- paramètre -->
         <li>
-            <a href="#">
+            <a href="settings.html">
             <i class='bx bx-cog'></i>
             <span class="links_name">Settings</span>
         </a>
@@ -60,9 +60,9 @@
         <!-- profil -->
         <li class="profile">
             <div class="profile-details">
-                <img src="profile.jpg" alt="profileImg">
+                <img src="profile.jpg" alt="Profile" class="profile">
                 <div class="name_job">
-                    <div class="name">pseudo</div>
+                    <div class="sidebar-name pseudo">pseudo</div>
                 </div>
             </div>
             <!-- déconnexion compte -->
@@ -75,25 +75,17 @@
     <div class="text">Social Working Club</div>
 
     <div class="profile-container">
-        <form id="settings-form" style="display:none;" enctype="multipart/form-data">
         <div class="profile-header">
             <div class="profile-img-container">
-                <img src="default-profile.png" alt="Profile Image" class="profile-image">
-                <!-- Pencil Icon for editing the profile image -->
-                <button class="edit-button" id="edit-image"><i class='bx bx-pencil'></i></button>
-            </div>
+                <img src="default-profile.png" alt="Profile" class="profile-image">
+              </div>
             <div class="username-container">
-                <div class="name">Pseudo</div>
-                <!-- Pencil Icon for editing the username -->
-                <button class="edit-button" id="edit-username"><i class='bx bx-pencil'></i></button>
+                <div class="name pseudo">Pseudo</div>
             </div>
             <div class="profile-bio-container">
                 <p class="bio">This is the user's bio...</p>
-                <!-- Pencil Icon for editing the bio -->
-                <button class="edit-button" id="edit-bio"><i class='bx bx-pencil'></i></button>
             </div>            
-          </div> 
-        </form>         
+          </div>       
     </div>
 
     <style>
@@ -116,10 +108,24 @@
         }
         
         .profile-image {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin-bottom: 10px;
+            padding: 40px;
+            background-color: lightslategray;
+            border-radius: 100%;
+            margin-bottom: 30px;
+        }
+
+        .name {
+            background-color: lightslategray;
+            border-radius: 30px;
+            padding: 10px;
+            margin: 30px;
+        }
+
+        .bio {
+            background-color: lightslategray;
+            border-radius: 30px;
+            padding: 20px;
+            margin: 30px;
         }
         
         .username {
@@ -142,61 +148,8 @@
             margin-top: 15px;
         }
         
-        .settings-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            z-index: 10;
-        }
-
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            left: 50px;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 5px;
-            padding: 15px;
-        }
-
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
         
-          
-          .profile-img-container:hover .edit-button,
-          .username-container:hover .edit-button,
-          .profile-bio-container:hover .edit-button {
-            visibility: visible;
-          }
-          
-          .edit-button {
-            visibility: hidden;
-            position: absolute;
-            right: 0;
-            top: 0;
-          }          
-
+               
         /* Mobile responsiveness */
         @media screen and (max-width: 768px) {
             .profile-container, .settings-modal {
@@ -245,95 +198,6 @@
                     closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
                 }
             }
-        
-            // Editing functionality
-            let editUsernameBtn = document.getElementById('edit-username');
-            let editImageBtn = document.getElementById('edit-image');
-            let editBioBtn = document.getElementById('edit-bio');
-        
-            // Replace placeholders with actual content if needed
-            document.querySelectorAll('.name').forEach(element => {
-                element.textContent = 'Actual Name'; // Replace with actual name or username
-            });
-        
-            // Profile image editing
-            if (editImageBtn) {
-                editImageBtn.addEventListener('click', function() {
-                    let imageInput = document.createElement('input');
-                    imageInput.type = 'file';
-                    imageInput.accept = 'image/*';
-                    imageInput.onchange = function(event) {
-                        // Handle file selection
-                    };
-                    imageInput.click();
-                });
-            }
-        
-            // Username editing
-            if (editUsernameBtn) {
-                editUsernameBtn.addEventListener('click', enableUsernameEdit);
-            }
-        
-            // Bio editing
-            if (editBioBtn) {
-                editBioBtn.addEventListener('click', function() {
-                    let bioElement = document.querySelector('.bio');
-                    let currentBio = bioElement.innerText;
-                    let bioTextarea = document.createElement('textarea');
-                    bioTextarea.value = currentBio;
-        
-                    let saveBioBtn = document.createElement('button');
-                    saveBioBtn.innerText = 'Save';
-                    saveBioBtn.onclick = function() {
-                        // Handle bio save
-                    };
-        
-                    bioElement.replaceWith(bioTextarea);
-                    bioTextarea.after(saveBioBtn);
-                    bioTextarea.focus();
-                });
-            }
-        });
-        
-        function saveUsername(newUsername) {
-            fetch('/updateProfile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username: newUsername })
-            })
-            .then(handleResponse) // Traite la réponse JSON
-            .then(data => {
-                if (data.success) {
-                    // Logique pour mettre à jour l'interface utilisateur après un changement de nom d'utilisateur réussi
-                    alert('Nom d’utilisateur mis à jour avec succès.');
-                } else {
-                    throw new Error('La mise à jour du nom d’utilisateur a échoué');
-                }
-            })
-            .catch(handleError); // Gère les erreurs réseau et autres erreurs
-        }
-        
-        function saveBio(newBio) {
-            fetch('/updateProfile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ bio: newBio })
-            })
-            .then(handleResponse) // Traite la réponse JSON
-            .then(data => {
-                if (data.success) {
-                    // Logique pour mettre à jour l'interface utilisateur après une mise à jour de bio réussie
-                    alert('Bio mise à jour avec succès.');
-                } else {
-                    throw new Error('La mise à jour de la bio a échoué');
-                }
-            })
-            .catch(handleError); // Gère les erreurs réseau et autres erreurs
-        }
 
         function handleResponse(response) {
             if (!response.ok) {
@@ -352,204 +216,32 @@
         if (settingsForm) {
             settingsForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-        
-                // FormData and fetch call for form submission
             });
         }
-        
-        // Modal closing logic
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('settingsModal')) {
-                document.getElementById('settingsModal').style.display = "none";
-            }
-        }
 
-// Function to replace the username element with an input box
-function enableUsernameEdit() {
-    let usernameElement = document.querySelector('.username');
-    let usernameInput = document.createElement('input');
-    usernameInput.type = 'text';
-    usernameInput.className = 'username-input';
-    usernameInput.value = usernameElement.textContent;
-    
-    usernameElement.parentNode.replaceChild(usernameInput, usernameElement);
-    
-    // Save button for the username
-    let saveButton = document.createElement('button');
-    saveButton.textContent = 'Save';
-    saveButton.onclick = () => saveUsername(usernameInput.value);
-    
-    usernameInput.parentNode.insertBefore(saveButton, usernameInput.nextSibling);
-}
-
-// Function to save the new username to the server
-function saveUsername(newUsername) {
-    fetch('/updateProfile', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: newUsername })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update the username on the page and remove the input box
-            let usernameInput = document.querySelector('.username-input');
-            let newUsernameElement = document.createElement('h1');
-            newUsernameElement.className = 'username';
-            newUsernameElement.textContent = newUsername;
-            
-            usernameInput.parentNode.replaceChild(newUsernameElement, usernameInput);
-            document.querySelector('button').remove(); // Assuming it's the save button
-        } else {
-            alert('Error updating username.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while updating the username.');
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    let editUsernameBtn = document.getElementById('edit-username');
-    let editImageBtn = document.getElementById('edit-image');
-    let editBioBtn = document.getElementById('edit-bio');
-    let saveUsernameBtn, saveBioBtn; // Buttons for saving the username and bio
-
-    if (editUsernameBtn) {
-        editUsernameBtn.addEventListener('click', function() {
-            console.log('Edit username clicked!');
-            // Your editing logic here
-        });
-    } else {
-        console.log('Edit username button not found!');
-    }
-    // Show an input field for username editing
-    if (editUsernameBtn) {
-        editUsernameBtn.addEventListener('click', function() {
+        function enableUsernameEdit() {
             let usernameElement = document.querySelector('.username');
-            let currentUsername = usernameElement.innerText;
             let usernameInput = document.createElement('input');
             usernameInput.type = 'text';
-            usernameInput.value = currentUsername;
-            usernameInput.classList.add('username-edit-input');
+            usernameInput.className = 'username-input';
+            usernameInput.value = usernameElement.textContent;
+            usernameElement.parentNode.replaceChild(usernameInput, usernameElement);
+        
+            let saveButton = document.createElement('button');
+            saveButton.textContent = 'Save';
+            saveButton.className = 'save-button'; // Assurez-vous que cette classe correspond au CSS que nous avons ajouté
+            saveButton.onclick = () => saveUsername(usernameInput.value);
+        
+            usernameInput.parentNode.insertBefore(saveButton, usernameInput.nextSibling);
+        }
+    });
 
-            saveUsernameBtn = document.createElement('button');
-            saveUsernameBtn.innerText = 'Save';
-            saveUsernameBtn.onclick = function() {
-                // TODO: Send the new username to the server
-                // After saving, replace the input with the updated username
-                usernameElement.innerText = usernameInput.value;
-                usernameInput.replaceWith(usernameElement);
-                saveUsernameBtn.remove();
-            };
-
-            usernameElement.replaceWith(usernameInput);
-            usernameInput.after(saveUsernameBtn);
-            usernameInput.focus();
-        });
-    }
-
-    // Show a file input for image editing
-    if (editImageBtn) {
-        editImageBtn.addEventListener('click', function() {
-            let imageInput = document.createElement('input');
-            imageInput.type = 'file';
-            imageInput.accept = 'image/*';
-            imageInput.onchange = function(event) {
-                // TODO: Send the new image to the server and update the profile image
-            };
-            imageInput.click();
-        });
-    }
-
-    // Show a textarea for bio editing
-    if (editBioBtn) {
-        editBioBtn.addEventListener('click', function() {
-            let bioElement = document.querySelector('.bio');
-            let currentBio = bioElement.innerText;
-            let bioTextarea = document.createElement('textarea');
-            bioTextarea.value = currentBio;
-
-            saveBioBtn = document.createElement('button');
-            saveBioBtn.innerText = 'Save';
-            saveBioBtn.onclick = function() {
-                // TODO: Send the new bio to the server
-                // After saving, replace the textarea with the updated bio
-                bioElement.innerText = bioTextarea.value;
-                bioTextarea.replaceWith(bioElement);
-                saveBioBtn.remove();
-            };
-
-            bioElement.replaceWith(bioTextarea);
-            bioTextarea.after(saveBioBtn);
-            bioTextarea.focus();
-        });
-    }
-
-    // Function to update the username on the server
-    function saveUsername(newUsername) {
-        // Replace this URL with the actual endpoint on your server
-        fetch('/updateProfile', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Username updated successfully!');
-            } else {
-                alert('Error updating username.');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Function to update the bio on the server
-    function saveBio(newBio) {
-        // Replace this URL with the actual endpoint on your server
-        fetch('/updateProfile', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ bio: newBio })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Bio updated successfully!');
-            } else {
-                alert('Error updating bio.');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Event listener for the save username button
-    if (saveUsernameBtn) {
-        saveUsernameBtn.addEventListener('click', function() {
-            let usernameInput = document.querySelector('.username-edit-input');
-            let newUsername = usernameInput.value;
-            saveUsername(newUsername);
-        });
-    }
-
-    // Event listener for the save bio button
-    if (saveBioBtn) {
-        saveBioBtn.addEventListener('click', function() {
-            let bioTextarea = document.querySelector('.bio-edit-textarea');
-            let newBio = bioTextarea.value;
-            saveBio(newBio);
-        });
-    }
-});
-  
+    document.addEventListener('DOMContentLoaded', () => {
+        const pseudo = localStorage.getItem('pseudo');
+        if (pseudo) {
+            document.querySelectorAll('.pseudo').forEach(el => el.textContent = pseudo);
+        }
+    });
     </script>
 </body>
 </html>

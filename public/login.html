@@ -8,7 +8,6 @@
     
     <!-- Logo -->
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
    </head>
     <body>
@@ -16,8 +15,8 @@
         <div class="sidebar">
             <!-- titre + logo de la sidebar -->
             <div class="logo-details">
-                <i class='bx bxl-c-plus-plus icon'></i>
-                    <div class="logo_name"><?pseudo></div>
+                <!-- <i class='bx bxl-c-plus-plus icon'></i> -->
+                    <!-- <div class="logo_name"><?pseudo></div> -->
                     <i class='bx bx-menu' id="btn" ></i>
             </div>
             <!-- sidebar list -->
@@ -53,7 +52,7 @@
             </li>
             <!-- paramètre -->
             <li>
-                <a href="#">
+                <a href="settings.html">
                 <i class='bx bx-cog'></i>
                 <span class="links_name">Settings</span>
             </a>
@@ -64,7 +63,7 @@
                 <div class="profile-details">
                     <img src="profile.jpg" alt="profileImg">
                     <div class="name_job">
-                        <div class="name"><?pseudo></div>
+                        <div class="sidebar-name pseudo">pseudo</div>
                     </div>
                 </div>
                 <!-- déconnexion compte -->
@@ -77,14 +76,14 @@
         <div class="text">Social Working Club</div>
 
         <div class="form-container">
-            <form id="login-form">
+            <form id="login-form" action="/login" method="post">
                 <h2>Connexion</h2>
                 <div class="input-container">
-                    <input type="email" id="login-email" required>
+                    <input type="email" id="login-email" name="email" required>
                     <label>Email</label>
                 </div>
                 <div class="input-container">
-                    <input type="password" id="login-password" required>
+                    <input type="password" id="login-password" name="password" required>
                     <label>Mot de passe</label>
                 </div>
                 <button type="submit">Se connecter</button>
@@ -98,24 +97,59 @@
     let closeBtn = document.querySelector("#btn");
     let searchBtn = document.querySelector(".bx-search");
 
-    closeBtn.addEventListener("click", ()=>{
-        sidebar.classList.toggle("open");
-        menuBtnChange();//calling the function
-    });
+closeBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    menuBtnChange(); //calling the function
+});
 
-    searchBtn.addEventListener("click", ()=>{ // Sidebar open when you click on the search icon
-        sidebar.classList.toggle("open");
-        menuBtnChange(); //calling the function
-    });
+searchBtn.addEventListener("click", () => { // Sidebar open when you click on the search icon
+    sidebar.classList.toggle("open");
+    menuBtnChange(); //calling the function
+});
 
-    // following are the code to change sidebar img
-    function menuBtnChange() {
-    if(sidebar.classList.contains("open")){
-        closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");//replacing the icons class
-    }else {
-        closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the icons class
+function menuBtnChange() {
+    if (sidebar.classList.contains("open")) {
+        closeBtn.classList.replace("bx-menu", "bx-menu-alt-right"); //replacing the icons class
+    } else {
+        closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); //replacing the icons class
     }
-    }     
+}
+
+document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === "Login successful") {
+            localStorage.setItem('pseudo', data.pseudo);
+            window.location.href = '/profile.html';
+        } else {
+            throw new Error(data.message || 'Authentication failed');
+        }
+    })
+    .catch(error => {
+        console.error('Login Failed:', error);
+        alert('Login failed: ' + error.message);
+    });
+});    
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Update pseudo display in sidebar and profile
+    const userPseudo = localStorage.getItem('pseudo'); // Get pseudo from local storage
+    if (userPseudo) {
+        const pseudoElements = document.querySelectorAll('.pseudo'); // All elements with class 'pseudo'
+        pseudoElements.forEach(function(element) {
+            element.textContent = userPseudo; // Set text to user's pseudo
+        });
+    }
+});
 
     document.getElementById('signup-form').addEventListener('submit', function(e) {
         e.preventDefault(); // Empêche l'envoi du formulaire
@@ -130,6 +164,31 @@
             alert('Les mots de passe ne correspondent pas.');
         }
     });
+
+    const authenticate = (email, password) => {
+        return new Promise((resolve, reject) => {
+          // Example using a pseudo database query
+          database.query('SELECT * FROM users WHERE email = ?', [email], function(error, results) {
+            if (error) {
+              return reject(new Error('Database error'));
+            }
+            if (results.length === 0) {
+              return reject(new Error('No user found with that email'));
+            }
+            const user = results[0];
+            if (user.password !== password) { // Simple check (in real applications use hashed passwords)
+              return reject(new Error('Password does not match'));
+            }
+            resolve(user);
+          });
+        });
+      };      
+
+    const jwt = require('jsonwebtoken');
+
+    // À l'intérieur de votre route de connexion, après avoir vérifié le mot de passe
+    const token = jwt.sign({ id: user._id }, 'votreSecretJWT', { expiresIn: '1h' });
+    res.json({ message: "Connexion réussie", token });
 </script>
 
 </body>

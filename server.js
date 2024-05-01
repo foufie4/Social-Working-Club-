@@ -1,183 +1,160 @@
 require('dotenv').config();
-console.log('Email User:', process.env.EMAIL_USER);
-console.log('Email Pass:', process.env.EMAIL_PASS);
-
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const User = require('./user');
-const Post = require('./post');
-const Joi = require('joi');
-
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
+const Joi = require('joi');
 
+// Import models
+const User = require('./user');
+const Post = require('./post');
+
+// Import routers
+const userRoutes = require('./userRoutes'); // Ensure this path is correct
 const app = express();
+const PORT = process.env.PORT || 3000;
 const saltRounds = 10;
 
+// Multer for handling file uploads
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
-// Connect to MongoDB
-mongoose.connect('mongodb+srv://shamalow423:Fl0ch1_R1ku@x-files.fujab62.mongodb.net/?retryWrites=true&w=majority&appName=X-files', { 
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log('MongoDB Connected'))
-.catch(err => console.log(err));
-
 // Middleware
 app.use(cors());
+app.use(express.json());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Envoyer le fichier HTML à la racine
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection error:', err));
 
-// Schéma Joi pour la validation d'inscription
-const registrationSchema = Joi.object({
-    fullname: Joi.string().required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-});
-
-// Configurer le transporteur NodeMailer
-let transporter = nodemailer.createTransport({
+// Email configuration
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Your Gmail address
-    pass: process.env.EMAIL_PASS  // Your generated App Password
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
   }
 });
 
 transporter.verify(function(error, success) {
-if (error) {
-  console.error("Email transporter configuration is incorrect:", error);
-} else {
-  console.log("Email transporter is ready to send messages.");
-}
-});
-
-// Endpoint to verify the account
-app.get('/verify', async (req, res) => {
-  const { token } = req.query;
-  try {
-    const user = await User.findOne({ verificationToken: token });
-    if (!user) {
-      return res.status(400).send('Invalid token.');
-    }
-    user.verified = true;
-    await user.save();
-
-    res.redirect(`profil.html`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error during account verification.');
+  if (error) {
+      console.error("Email transporter configuration is incorrect:", error);
+  } else {
+      console.log("Email transporter is ready to send messages.");
   }
 });
 
-// Registration route
+// Routes
+app.use('/api/users', userRoutes);
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+const users = [{ email: "user@example.com", password: "password123" }]; // Example user list
+
+function authenticate(email, password) {
+  return new Promise((resolve, reject) => {
+    const user = users.find(user => user.email === email && user.password === password);
+    if (user) {
+      resolve(user); // Authentication successful
+    } else {
+      reject(new Error("Authentication failed")); // Authentication failed
+    }
+  });
+}
+
+// Verification endpoint
+app.get('/verify', async (req, res) => {
+  const { token } = req.query; // Extract the token from query string
+  if (!token) {
+      return res.status(400).json({ message: "No token provided" });
+  }
+
+  try {
+      const user = await User.findOne({ verificationToken: token });
+      if (!user) {
+          return res.status(404).json({ message: "User not found or already verified" });
+      }
+
+      user.verified = true;
+      await user.save();
+
+      // Redirect to a success page or send a success response
+      res.redirect('/verification-success.html'); // Assuming you have a success page
+  } catch (error) {
+      console.error('Verification error:', error);
+      res.status(500).json({ message: "Error verifying user." });
+  }
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  authenticate(email, password)
+    .then(user => {
+      // Generate a token or handle login success
+      res.status(200).json({ message: "Login successful", user });
+    })
+    .catch(error => {
+      // Handle authentication failure
+      res.status(401).json({ message: error.message });
+    });
+});
+
 app.post('/signup', async (req, res) => {
   try {
-    const { fullname, email, password } = await registrationSchema.validateAsync(req.body);
+      const { fullname, email, password } = req.body;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const newUser = new User({
+          fullname,
+          email,
+          password: hashedPassword,
+          verificationToken: uuidv4(), // Ensure this generates a token
+          verified: false
+      });
 
-    const verificationToken = uuidv4(); // generate the token first
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+      console.log('New User:', newUser); // Log the new user object
 
-    // create the user with the token
-    const newUser = new User({
-      fullname,
-      email,
-      password: hashedPassword,
-      verificationToken, // include this line to save the token
-      verified: false
-    });
+      await newUser.save();
 
-    await newUser.save(); // then save the user
+      let mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: 'Verify Your Account',
+          html: `<p>Click the following link to verify your account:</p><a href="http://localhost:${PORT}/verify?token=${newUser.verificationToken}">Verify My Account</a>`
+      };
 
-    // now send the email
-    let mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: newUser.email,
-        subject: 'Verify Your Account',
-        html: `<p>Click the following link to verify your account:</p>
-               <a href="http://localhost:5000/verify?token=${verificationToken}">Verify My Account</a>`
-    };
+      console.log('Verification Email Link:', mailOptions.html); // Log the final email link
 
-    transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
-            console.log(error);
-            res.status(500).json({ message: "Error sending email." });
-        } else {
-            console.log('Email sent: ' + info.response);
-            res.status(201).json({ message: 'Account created successfully! Please check your email.' });
-        }
-    });
-
+      transporter.sendMail(mailOptions, function(error, info) {
+          if (error) {
+              console.log(error);
+              res.status(500).json({ message: "Error sending email." });
+          } else {
+              console.log('Email sent: ' + info.response);
+              res.status(201).json({ message: 'Account created successfully! Please check your email.' });
+          }
+      });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating user." });
+      console.error(error);
+      res.status(500).json({ message: "Error creating user." });
   }
 });
 
-// Login validation schema
-const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
-});
-
-app.post('/updateProfile', upload.single('profileImage'), async (req, res) => {
-  try {
-    // Check if the user is authenticated first
-    if (!req.session || !req.session.userId) {
-      return res.status(401).json({ message: "You must be logged in to do that." });
-    }
-    const userId = req.session.userId;
-
-    // Get the bio and username from the body, and the image file path from multer's req.file
-    const { username, bio } = req.body;
-    const profileImagePath = req.file ? req.file.path : null;
-
-    const updateData = {
-      ...(username && { username }),
-      ...(bio && { bio }),
-      ...(profileImagePath && { profileImage: profileImagePath })
-    };
-
-    await User.findByIdAndUpdate(userId, updateData);
-    res.json({ success: true, message: 'Profile updated successfully' });
-  } catch (error) {
-    console.error('Update Profile Error:', error);
-    res.status(500).json({ message: "Error updating profile." });
-  }
-});
-
-  
-// Login route
-app.post('/login', async (req, res) => {
-  try {
-    const { email, password } = await loginSchema.validateAsync(req.body);
-    const user = await User.findOne({ email: email });
-    if (user && await bcrypt.compare(password, user.password)) {
-      res.json({ message: "Successfully logged in!" });
-    } else {
-      res.status(400).json({ message: "Incorrect email or password." });
-    }
-  } catch (error) {
-    if (error.isJoi === true) {
-      res.status(400).json({ message: "Provided data is not valid." });
-    } else {
-      res.status(500).json({ message: error.message });
-    }
-  }
-});
-
-// Start the server
-const PORT = process.env.PORT || 5000;
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,29 +1,28 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const saltRounds = 10; // C'est le facteur de coût pour le hashage
+
+const saltRounds = 10;  // Cost factor for hashing
 
 const userSchema = new mongoose.Schema({
-    fullname: String, 
-    email: String,
+    fullname: { type: String, required: true },
+    email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
-    verified: { type: Boolean, default: false }, // Ajouté pour la vérification de l'email
-    verificationToken: { type: String }, // Ajouté pour stocker le token de vérification
-    profileImage: String,
-    bio: String
+    notificationsEnabled: { type: Boolean, default: false }
 });
 
-// Avant d'enregistrer l'utilisateur, hashons le mot de passe
-userSchema.pre('save', function(next) {
-    // Ne hasher le mot de passe que si celui-ci a été modifié (ou est nouveau)
+// Pre-save hook to hash password
+userSchema.pre('save', async function(next) {
+    // Only hash the password if it has been modified (or is new)
     if (!this.isModified('password')) return next();
 
-    // Génération du sel et du hash
-    bcrypt.hash(this.password, saltRounds, (err, hash) => {
-        if (err) return next(err);
-        // Remplacement du mot de passe clair par le hash
+    try {
+        const hash = await bcrypt.hash(this.password, saltRounds);
         this.password = hash;
         next();
-    });
+    } catch (error) {
+        return next(error);
+    }
 });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+module.exports = User;
