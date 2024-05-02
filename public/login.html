@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style_connect.css">
     <title>Social Working Club</title>
-    
     <!-- Logo -->
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-
    </head>
     <body>
         <!-- SIDEBAR -->
         <div class="sidebar">
             <!-- titre + logo de la sidebar -->
             <div class="logo-details">
-                <!-- <i class='bx bxl-c-plus-plus icon'></i> -->
-                    <!-- <div class="logo_name"><?pseudo></div> -->
                     <i class='bx bx-menu' id="btn" ></i>
             </div>
             <!-- sidebar list -->
@@ -63,7 +59,7 @@
                 <div class="profile-details">
                     <img src="profile.jpg" alt="profileImg">
                     <div class="name_job">
-                        <div class="sidebar-name pseudo">pseudo</div>
+                        <div class="sidebar-name fullname">pseudo</div>
                     </div>
                 </div>
                 <!-- déconnexion compte -->
@@ -115,55 +111,51 @@ function menuBtnChange() {
     }
 }
 
-document.getElementById('login-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-
-    fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, password: password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message === "Login successful") {
-            localStorage.setItem('pseudo', data.pseudo);
-            window.location.href = '/profile.html';
-        } else {
-            throw new Error(data.message || 'Authentication failed');
-        }
-    })
-    .catch(error => {
-        console.error('Login Failed:', error);
-        alert('Login failed: ' + error.message);
-    });
-});    
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Update pseudo display in sidebar and profile
-    const userPseudo = localStorage.getItem('pseudo'); // Get pseudo from local storage
-    if (userPseudo) {
-        const pseudoElements = document.querySelectorAll('.pseudo'); // All elements with class 'pseudo'
-        pseudoElements.forEach(function(element) {
-            element.textContent = userPseudo; // Set text to user's pseudo
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+        signupForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêche l'envoi du formulaire
+            // Votre logique de traitement ici
         });
+    } else {
+        console.error('Signup form not found');
     }
 });
 
-    document.getElementById('signup-form').addEventListener('submit', function(e) {
-        e.preventDefault(); // Empêche l'envoi du formulaire
-    
-        var password = document.getElementById('password').value;
-        var confirmPassword = document.getElementById('confirm-password').value;
-    
-        if(password === confirmPassword) {
-            alert('Le compte a été créé avec succès !');
-            // Ici, vous pourriez ajouter une logique pour envoyer les informations au serveur
-        } else {
-            alert('Les mots de passe ne correspondent pas.');
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        })
+        .then(response => response.json()) // Transforme la réponse en json
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error); // Lance une erreur si le serveur renvoie une erreur
+            }
+            console.log('Login successful:', data);
+            window.location.href = 'profil.html'; // Redirection
+        })
+        .catch(error => {
+            console.error('Login Failed:', error);
+            alert('Login failed: ' + error.message);
+        });        
     });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const fullname = localStorage.getItem('fullname');
+    if (fullname) {
+        document.querySelectorAll('.fullname').forEach(el => el.textContent = fullname);
+    }
+});
 
     const authenticate = (email, password) => {
         return new Promise((resolve, reject) => {

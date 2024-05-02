@@ -1,28 +1,35 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('./user'); // Ensure this path is correct
 const router = express.Router();
-const app = express();
-app.use(express.json());
+const { loginUser, signupUser } = require('./userController');
 
-router.use(bodyParser.json()); // Make sure bodyParser is correctly configured
+router.use(bodyParser.json());
 
-const users = [
-    { email: "shamalow423@gmail.com", password: "oips dqra sdid jloe" }
-];
-
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const user = users.find(u => u.email === email);
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: "No user found with that email" });
+        }
 
-    if (!user) {
-        return res.status(401).json({ message: 'Authentication failed' });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Password does not match" });
+        }
+
+        const token = jwt.sign({ id: user._id }, 'yourSecretKey', { expiresIn: '1h' });
+        res.status(200).json({ message: "Login successful", token, pseudo: user.fullname });
+    } catch (error) {
+        console.error('Login processing error:', error);
+        res.status(500).json({ message: "Internal server error" });
     }
-
-    if (user.password !== password) {
-        return res.status(401).json({ message: 'Authentication failed' });
-    }
-
-    res.json({ message: "Login successful", pseudo: "UserPseudo" });
 });
+
+router.post('/login', loginUser);
+router.post('/signup', signupUser);
 
 module.exports = router;

@@ -14,8 +14,6 @@
     <div class="sidebar">
         <!-- titre + logo de la sidebar -->
         <div class="logo-details">
-            <!-- <i class='bx bxl-c-plus-plus icon'></i>
-                <div class="logo_name">pseudo</div> -->
                 <i class='bx bx-menu' id="btn" ></i>
         </div>
         <!-- sidebar list -->
@@ -62,7 +60,7 @@
             <div class="profile-details">
                 <img src="profile.jpg" alt="Profile" class="profile">
                 <div class="name_job">
-                    <div class="sidebar-name pseudo">pseudo</div>
+                    <div class="sidebar-name fullname"><%= adminUsername %></div>
                 </div>
             </div>
             <!-- déconnexion compte -->
@@ -80,7 +78,7 @@
                 <img src="default-profile.png" alt="Profile" class="profile-image">
               </div>
             <div class="username-container">
-                <div class="name pseudo">Pseudo</div>
+                <div class="name fullname"><%= adminUsername %></div>
             </div>
             <div class="profile-bio-container">
                 <p class="bio">This is the user's bio...</p>
@@ -236,12 +234,16 @@
         }
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const pseudo = localStorage.getItem('pseudo');
-        if (pseudo) {
-            document.querySelectorAll('.pseudo').forEach(el => el.textContent = pseudo);
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/config');
+            const config = await response.json();
+            document.querySelectorAll('.fullname').forEach(el => el.textContent = config.adminUsername);
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la configuration:', error);
         }
-    });
+    });       
+       
     </script>
 </body>
 </html>

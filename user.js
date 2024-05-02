@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-
-const saltRounds = 10;  // Cost factor for hashing
+const saltRounds = 10;
 
 const userSchema = new mongoose.Schema({
     fullname: { type: String, required: true },
@@ -10,17 +9,14 @@ const userSchema = new mongoose.Schema({
     notificationsEnabled: { type: Boolean, default: false }
 });
 
-// Pre-save hook to hash password
 userSchema.pre('save', async function(next) {
-    // Only hash the password if it has been modified (or is new)
     if (!this.isModified('password')) return next();
-
     try {
         const hash = await bcrypt.hash(this.password, saltRounds);
         this.password = hash;
         next();
     } catch (error) {
-        return next(error);
+        next(error);
     }
 });
 

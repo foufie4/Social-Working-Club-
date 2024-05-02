@@ -1,10 +1,13 @@
 require('dotenv').config();
 const express = require('express');
-const path = require('path');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+const userRoutes = require('./userRoutes');
+
+const path = require('path');
+const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
 const Joi = require('joi');
@@ -14,7 +17,6 @@ const User = require('./user');
 const Post = require('./post');
 
 // Import routers
-const userRoutes = require('./userRoutes'); // Ensure this path is correct
 const app = express();
 const PORT = process.env.PORT || 3000;
 const saltRounds = 10;
@@ -26,10 +28,9 @@ const upload = multer({ dest: 'uploads/' });
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
-app.use(express.static(path.join(__dirname, 'public')));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -57,14 +58,25 @@ transporter.verify(function(error, success) {
 });
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use('/user', userRoutes);
+
+app.set('view engine', 'ejs');
 
 // Root endpoint
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/profile', (req, res) => {
+  res.render('profile', { adminUsername: process.env.ADMIN_USERNAME });
+});
+
+app.get('/config', (req, res) => {
+  res.json({ adminUsername: process.env.ADMIN_USERNAME });
+});
+
 const users = [{ email: "user@example.com", password: "password123" }]; // Example user list
+const adminUsername = process.env.ADMIN_USERNAME;
 
 function authenticate(email, password) {
   return new Promise((resolve, reject) => {
@@ -103,14 +115,23 @@ app.get('/verify', async (req, res) => {
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  authenticate(email, password)
+  User.findOne({ email: email })
     .then(user => {
-      // Generate a token or handle login success
-      res.status(200).json({ message: "Login successful", user });
+      if (!user) {
+        return res.status(401).json({ message: 'No user found with that email' });
+      }
+      return bcrypt.compare(password, user.password).then(isMatch => {
+        if (!isMatch) {
+          return res.status(401).json({ message: 'Password does not match' });
+        }
+        // Assuming token generation and other operations here
+        res.cookie('fullname', user.fullname, { maxAge: 900000, httpOnly: true });
+        res.status(200).json({ message: "Login successful", user });
+      });
     })
     .catch(error => {
-      // Handle authentication failure
-      res.status(401).json({ message: error.message });
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Internal server error' });
     });
 });
 
@@ -152,6 +173,13 @@ app.post('/signup', async (req, res) => {
       console.error(error);
       res.status(500).json({ message: "Error creating user." });
   }
+});
+
+require('dotenv').config();
+const jwtSecret = process.env.JWT_SECRET;
+
+app.get('/some-route', (req, res) => {
+  res.render('profile.html', { adminUsername: process.env.ADMIN_USERNAME });
 });
 
 // Start server

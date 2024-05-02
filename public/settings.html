@@ -77,7 +77,7 @@
 
 <div class="settings-container" >
     <h2>User Settings</h2>
-    <form id="settings-form">
+    <form id="settings-form" enctype="multipart/form-data">
         <label for="username">Change Username:</label>
         <input type="text" id="username" name="username" placeholder="Enter new username">
 
@@ -272,28 +272,26 @@
 
 document.getElementById('settings-form').addEventListener('submit', function(e) {
     e.preventDefault();
-
-    // Create a FormData object to hold the form data
     const formData = new FormData(this);
 
-    // Use Fetch API to send the form data to the backend
-    fetch('your-backend-endpoint', {
-        method: 'POST', // or 'PUT'
-        body: formData // the form data
-        // No need to set Content-Type header for FormData
+    fetch('/updateProfile', {  // Updated to use the correct endpoint
+        method: 'POST',
+        body: formData
     })
     .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        return response.json(); // if your backend sends a response back in JSON
+        return response.json();
     })
     .then(data => {
-        console.log(data); // Handle the response data
-        alert('Settings saved successfully!');
+        console.log('Success:', data);
+        alert('Profile updated successfully');
+        window.location.reload(); // Recharge la page pour afficher les nouvelles données
     })
     .catch(error => {
-        console.error('There was a problem saving the settings:', error);
+        console.error('Error:', error);
+        alert('Failed to update profile');
     });
 });
 

@@ -17,7 +17,7 @@
             <!-- titre + logo de la sidebar -->
             <div class="logo-details">
                 <i class='bx bxl-c-plus-plus icon'></i>
-                    <div class="logo_name"><?pseudo></div>
+                    <div class="logo_name">pseudo</div>
                     <i class='bx bx-menu' id="btn" ></i>
             </div>
             <!-- sidebar list -->
@@ -64,7 +64,7 @@
                 <div class="profile-details">
                     <img src="profile.jpg" alt="profileImg">
                     <div class="name_job">
-                        <div class="name"><?pseudo></div>
+                        <div class="fullname">pseudo</div>
                     </div>
                 </div>
                 <!-- déconnexion compte -->
@@ -122,7 +122,9 @@
         }else {
             closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the iocns class
         }
-        }     
+        }
+
+        localStorage.setItem('fullname', fullname);
 
         document.getElementById('signup-form').addEventListener('submit', function(e) {
             e.preventDefault(); // Empêche l'envoi normal du formulaire
@@ -157,6 +159,11 @@
                 alert('Les mots de passe ne correspondent pas.');
             }
         });
+
+        document.querySelector('#savePseudoButton').addEventListener('click', function() {
+            const fullname = document.querySelector('#fullname').value; // Assuming the ID of your input is 'fullname'
+            localStorage.setItem('fullname', fullname);
+        });        
     </script>
 
 </body>
