@@ -234,10 +234,17 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script defer>
     document.addEventListener('DOMContentLoaded', function() {
-        // Sidebar logic
         let sidebar = document.querySelector(".sidebar");
         let closeBtn = document.querySelector("#btn");
         let searchBtn = document.querySelector(".bx-search");
+    
+        function menuBtnChange() {
+            if (sidebar.classList.contains("open")) {
+                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
+            } else {
+                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
+            }
+        }
     
         closeBtn.addEventListener("click", () => {
             sidebar.classList.toggle("open");
@@ -249,51 +256,34 @@
             menuBtnChange();
         });
     
-        function menuBtnChange() {
-            if (sidebar.classList.contains("open")) {
-                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-            } else {
-                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
+        function handleResponse(response) {
+            if (!response.ok) {
+                throw Error('Failed to update profile: ' + response.statusText);
             }
+            return response.json();
         }
-
-    function handleResponse(response) {
-        if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+        
+        function handleError(error) {
+            console.error('Request Failed:', error);
+            alert('Error: ' + error.message);
         }
-        return response.json(); // Nous supposons ici que le serveur renvoie du JSON
-    }
     
-    function handleError(error) {
-        console.error('Fetch error: ', error);
-        alert('Une erreur s’est produite: ' + error.message);
-    }
-});
-
-document.getElementById('settings-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-
-    fetch('/updateProfile', {  // Updated to use the correct endpoint
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Success:', data);
-        alert('Profile updated successfully');
-        window.location.reload(); // Recharge la page pour afficher les nouvelles données
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to update profile');
-    });
-});
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('settings-form');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+        
+                fetch('/updateProfile', { // Make sure this matches your server route exactly
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => alert('Profile updated successfully!'))
+                .catch(error => alert('Failed to update profile: ' + error.message));
+            });
+        });        
+    });    
 
 document.getElementById('manage-posts').addEventListener('click', function() {
     // Logic to redirect to manage posts page
@@ -434,8 +424,6 @@ function unsubscribeFromNotifications() {
         });
     });
 }
-
-
 </script>
     </body>
 </html>

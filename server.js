@@ -33,12 +33,11 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect('mongodb://localhost:27017/socialTravailClub', {  // Update your connection string as needed
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => console.log("MongoDB connected successfully"))
+  .catch(err => console.error("MongoDB connection error:", err));
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -74,9 +73,39 @@ app.get('/profile', (req, res) => {
 app.get('/config', (req, res) => {
   res.json({ adminUsername: process.env.ADMIN_USERNAME });
 });
+const users = [
+  { username: "johndoe", email: "john@example.com", bio: "Developer.", notificationsEnabled: true },
+  { username: "janedoe", email: "jane@example.com", bio: "Designer.", notificationsEnabled: false }
+];
 
-const users = [{ email: "user@example.com", password: "password123" }]; // Example user list
+User.insertMany(users)
+  .then(() => console.log("Users added successfully"))
+  .catch(err => console.error("Error adding users:", err));
+  
 const adminUsername = process.env.ADMIN_USERNAME;
+
+app.post('/updateProfile', async (req, res) => {
+  const { id, username, bio, profilePic } = req.body;
+
+  if (!id || !username || !bio) {
+      return res.status(400).send('Missing required fields');
+  }
+
+  try {
+      const updatedUser = await User.findByIdAndUpdate(id, {
+          username, bio, profilePic
+      }, { new: true }); // `new: true` returns the updated document
+
+      if (!updatedUser) {
+          return res.status(404).send('User not found');
+      }
+
+      res.send({ message: "Profile updated successfully", data: updatedUser });
+  } catch (error) {
+      console.error('Database update failed:', error);
+      res.status(500).send('Failed to update user profile');
+  }
+});
 
 function authenticate(email, password) {
   return new Promise((resolve, reject) => {
@@ -180,6 +209,40 @@ const jwtSecret = process.env.JWT_SECRET;
 
 app.get('/some-route', (req, res) => {
   res.render('profile.html', { adminUsername: process.env.ADMIN_USERNAME });
+});
+
+// API endpoint to update user settings
+app.post('/api/users/update-settings', async (req, res) => {
+  const { userId, notificationsEnabled } = req.body;
+
+  if (!userId) {
+      return res.status(400).send('User ID is required');
+  }
+  if (typeof notificationsEnabled !== 'boolean') {
+      return res.status(400).send('Invalid notifications setting');
+  }
+
+  try {
+      const updatedUser = await User.findByIdAndUpdate(userId, {
+          notificationsEnabled
+      }, { new: true });  // 'new: true' to return the updated document
+
+      if (!updatedUser) {
+          return res.status(404).send('User not found');
+      }
+
+      res.json({
+          message: "Settings updated successfully",
+          user: {
+              id: updatedUser._id,
+              username: updatedUser.username,
+              notificationsEnabled: updatedUser.notificationsEnabled
+          }
+      });
+  } catch (error) {
+      console.error('Database update failed:', error);
+      res.status(500).send('Error updating user settings');
+  }
 });
 
 // Start server
