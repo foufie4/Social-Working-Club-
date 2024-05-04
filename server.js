@@ -33,11 +33,21 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/socialTravailClub', {  // Update your connection string as needed
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log("MongoDB connected successfully"))
-  .catch(err => console.error("MongoDB connection error:", err));
+mongoose.connect('mongodb://127.0.0.1:27017/socialTravailClub', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+function initializeUsers() {
+    const users = [
+        { username: "johndoe", email: "john@example.com", bio: "Developer.", notificationsEnabled: true },
+        { username: "janedoe", email: "jane@example.com", bio: "Designer.", notificationsEnabled: false }
+    ];
+
+    User.insertMany(users)
+        .then(() => console.log("Users added successfully"))
+        .catch(err => console.error("Error adding users:", err));
+}
 
 // Email configuration
 const transporter = nodemailer.createTransport({
