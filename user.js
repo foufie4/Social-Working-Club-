@@ -5,20 +5,18 @@ const saltRounds = 10;
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    verified: { type: Boolean, default: false },
+    verificationToken: { type: String, required: false },
     bio: String,
     notificationsEnabled: { type: Boolean, default: false }
 });
 
 userSchema.pre('save', async function(next) {
-    if (this.isModified('password')) return next();
-    try {
-        const hash = await bcrypt.hash(this.password, saltRounds);
-        this.password = hash;
-        next();
-    } catch (error) {
-        next(error);
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, saltRounds);
     }
+    next();
 });
 
-const User = mongoose.model('User', userSchema);
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

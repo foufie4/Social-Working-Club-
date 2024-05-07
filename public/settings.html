@@ -35,7 +35,7 @@
         </li>
         <!-- profil des users -->
         <li>
-            <a href="create_account.html">
+            <a href="register.html">
             <i class='bx bx-user'></i>
             <span class="links_name">Profil</span>
         </a>
@@ -324,21 +324,24 @@ const serverEndpoint = '/update-settings';
 
 $('#settings-form').on('submit', function(e) {
     e.preventDefault();
+    var formData = {
+        username: $('#username').val(),
+        bio: $('#bio').val(),
+        notifications: $('#notifications').is(':checked')
+    };
 
-    // Use jQuery's serialize method for the form data
-    var formData = $(this).serialize();
-
-    // Use jQuery's AJAX method to send the form data to the backend
     $.ajax({
-        url: '/api/users/update-settings',  // Correction: Utilisez l'URL réelle de votre endpoint
+        url: '/api/users/update-settings',
         type: 'POST',
-        data: formData,
-        success: function(data) {
-            console.log(data);
-            alert('Settings saved successfully!');
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            console.log('Response:', response);
+            alert('Settings updated successfully!');
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error('There was a problem saving the settings:', textStatus, errorThrown);
+        error: function(jqXHR) {
+            console.error('Error:', jqXHR.responseText);
+            alert('Failed to save settings. ' + jqXHR.responseText);
         }
     });
 });

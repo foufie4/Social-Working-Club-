@@ -83,7 +83,7 @@
                     <label>Mot de passe</label>
                 </div>
                 <button type="submit">Se connecter</button>
-                <p>Pas encore de compte ? <a href="create_account.html">Créez-en un ici.</a></p>
+                <p>Pas encore de compte ? <a href="register.html">Créez-en un ici.</a></p>
             </form>
         </div>
 </section>
@@ -111,45 +111,6 @@ function menuBtnChange() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const signupForm = document.getElementById('signup-form');
-    if (signupForm) {
-        signupForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Empêche l'envoi du formulaire
-            // Votre logique de traitement ici
-        });
-    } else {
-        console.error('Signup form not found');
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('login-form');
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-
-        fetch('/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        })
-        .then(response => response.json()) // Transforme la réponse en json
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error); // Lance une erreur si le serveur renvoie une erreur
-            }
-            console.log('Login successful:', data);
-            window.location.href = 'profil.html'; // Redirection
-        })
-        .catch(error => {
-            console.error('Login Failed:', error);
-            alert('Login failed: ' + error.message);
-        });        
-    });
-});
-
 document.addEventListener('DOMContentLoaded', () => {
     const fullname = localStorage.getItem('fullname');
     if (fullname) {
@@ -176,11 +137,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       };      
 
-    const jwt = require('jsonwebtoken');
-
-    // À l'intérieur de votre route de connexion, après avoir vérifié le mot de passe
-    const token = jwt.sign({ id: user._id }, 'votreSecretJWT', { expiresIn: '1h' });
-    res.json({ message: "Connexion réussie", token });
+      document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+    
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+    
+                fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        if(response.status === 401) {
+                            throw new Error('Incorrect email or password');
+                        } else {
+                            throw new Error('Failed to login');
+                        }
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        console.log('Login successful:', data);
+                        window.location.href = '/profil.html'; // Redirect to the profile page
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Login failed:', error);
+                    alert('Login failed: ' + error.message);
+                });
+            });
+        } else {
+            console.error('Login form not found');
+        }
+    });
+    
 </script>
 
 </body>
