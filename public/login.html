@@ -75,11 +75,11 @@
             <form id="login-form" action="/login" method="post">
                 <h2>Connexion</h2>
                 <div class="input-container">
-                    <input type="email" id="login-email" name="email" required>
+                    <input type="email" id="email" name="email" required>
                     <label>Email</label>
                 </div>
                 <div class="input-container">
-                    <input type="password" id="login-password" name="password" required>
+                    <input type="password" name="password" required>
                     <label>Mot de passe</label>
                 </div>
                 <button type="submit">Se connecter</button>
@@ -118,68 +118,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-    const authenticate = (email, password) => {
-        return new Promise((resolve, reject) => {
-          // Example using a pseudo database query
-          database.query('SELECT * FROM users WHERE email = ?', [email], function(error, results) {
-            if (error) {
-              return reject(new Error('Database error'));
-            }
-            if (results.length === 0) {
-              return reject(new Error('No user found with that email'));
-            }
-            const user = results[0];
-            if (user.password !== password) { // Simple check (in real applications use hashed passwords)
-              return reject(new Error('Password does not match'));
-            }
-            resolve(user);
-          });
-        });
-      };      
+document.addEventListener('DOMContentLoaded', function() {
+    var inputElement = document.getElementById('email');
+    if (inputElement) {
+        var inputValue = inputElement.value;
+        console.log(inputValue);  // Confirm it works
+    } else {
+        console.error('Email input not found');
+    }
+});
 
-      document.addEventListener('DOMContentLoaded', function() {
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-    
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-    
-                fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        if(response.status === 401) {
-                            throw new Error('Incorrect email or password');
-                        } else {
-                            throw new Error('Failed to login');
-                        }
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        console.log('Login successful:', data);
-                        window.location.href = '/profil.html'; // Redirect to the profile page
-                    } else {
-                        throw new Error(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Login failed:', error);
-                    alert('Login failed: ' + error.message);
-                });
-            });
-        } else {
-            console.error('Login form not found');
+const authenticate = (email, password) => {
+    return new Promise((resolve, reject) => {
+      database.query('SELECT * FROM users WHERE email = ?', [email], function(error, results) {
+        if (error) {
+          return reject(new Error('Database error'));
         }
+        if (results.length === 0) {
+          return reject(new Error('No user found with that email'));
+        }
+        const user = results[0];
+        if (user.password !== password) { // Simple check (in real applications use hashed passwords)
+          return reject(new Error('Password does not match'));
+        }
+        resolve(user);
+      });
     });
-    
-</script>
+  };      
 
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            localStorage.setItem('token', data.token);
+            window.location.href = '/profil.html';
+        } else {
+            throw new Error(data.message || 'Login failed without a message.');
+        }
+    })
+    .catch(error => {
+        console.error('Login failed:', error.message);
+        alert('Login failed: ' + error.message);
+    });
+});
+</script>
 </body>
 </html>
