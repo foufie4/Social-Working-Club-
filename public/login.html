@@ -70,21 +70,21 @@
     <!-- TITRE -->
     <section class="home-section">
         <div class="text">Social Working Club</div>
-
         <div class="form-container">
-            <form id="login-form" action="/login" method="post">
+            <form id="login-form" action="/user/login" method="post">
                 <h2>Connexion</h2>
                 <div class="input-container">
-                    <input type="email" id="email" name="email" required>
-                    <label>Email</label>
+                    <input type="username" id="username" name="username" required>
+                    <label for="username">Username</label>
                 </div>
                 <div class="input-container">
-                    <input type="password" name="password" required>
-                    <label>Mot de passe</label>
+                    <input type="password" id="password" name="password" required>
+                    <label for="password">Mot de passe</label>
                 </div>
                 <button type="submit">Se connecter</button>
                 <p>Pas encore de compte ? <a href="register.html">Créez-en un ici.</a></p>
             </form>
+            <div id="error-message" style="color: red;"></div>
         </div>
 </section>
 
@@ -110,64 +110,35 @@ function menuBtnChange() {
         closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); //replacing the icons class
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const fullname = localStorage.getItem('fullname');
-    if (fullname) {
-        document.querySelectorAll('.fullname').forEach(el => el.textContent = fullname);
-    }
-});
-
 document.addEventListener('DOMContentLoaded', function() {
-    var inputElement = document.getElementById('email');
-    if (inputElement) {
-        var inputValue = inputElement.value;
-        console.log(inputValue);  // Confirm it works
-    } else {
-        console.error('Email input not found');
-    }
-});
+    document.getElementById('login-form').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-const authenticate = (email, password) => {
-    return new Promise((resolve, reject) => {
-      database.query('SELECT * FROM users WHERE email = ?', [email], function(error, results) {
-        if (error) {
-          return reject(new Error('Database error'));
-        }
-        if (results.length === 0) {
-          return reject(new Error('No user found with that email'));
-        }
-        const user = results[0];
-        if (user.password !== password) { // Simple check (in real applications use hashed passwords)
-          return reject(new Error('Password does not match'));
-        }
-        resolve(user);
-      });
-    });
-  };      
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
-  document.getElementById('login-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem('token', data.token);
-            window.location.href = '/profil.html';
-        } else {
-            throw new Error(data.message || 'Login failed without a message.');
-        }
-    })
-    .catch(error => {
-        console.error('Login failed:', error.message);
-        alert('Login failed: ' + error.message);
+        fetch('/user/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: username,
+              password: password
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              document.getElementById('error-message').innerText = data.error;
+              console.error('Error:', data.error);
+            } else {
+              console.log('Success:', data);
+              // Redirect to profile or another page after successful login
+              window.location.href = '/profil.html';
+            }
+          })
+          .catch(error => console.error('Error:', error));
     });
 });
 </script>

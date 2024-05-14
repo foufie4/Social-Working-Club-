@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const User = require('./user');
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -19,8 +20,6 @@ const fileFilter = (req, file, cb) => {
         cb(null, false);
     }
 };
-
-const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 router.post('/updateProfile', upload.single('profile-pic'), async (req, res) => {
     try {
