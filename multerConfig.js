@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const router = express.Router();
-const User = require('./user');
+const User = require('./models/user');
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 const storage = multer.diskStorage({

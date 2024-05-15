@@ -283,6 +283,7 @@
     
     input[type="text"],
     input[type="username"],
+    input[type="email"],
     input[type="password"] {
         width: 100%;
         padding: 10px;
@@ -295,6 +296,7 @@
     
     input[type="text"]:focus,
     input[type="username"]:focus,
+    input[type="email"]:focus,
     input[type="password"]:focus {
         border-bottom: 2px solid #6200ea;
     }
