@@ -110,37 +110,30 @@ function menuBtnChange() {
         closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); //replacing the icons class
     }
 }
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('login-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        fetch('/user/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              username: username,
-              password: password
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.error) {
-              document.getElementById('error-message').innerText = data.error;
-              console.error('Error:', data.error);
-            } else {
-              console.log('Success:', data);
-              // Redirect to profile or another page after successful login
-              window.location.href = '/profil.html';
-            }
-          })
-          .catch(error => console.error('Error:', error));
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      try {
+        const response = await fetch('/user/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+        if (response.ok) {
+          window.location.href = '/profil';
+        } else {
+          const errorData = await response.json();
+          document.getElementById('error-message').innerText = errorData.error || 'Login failed';
+        }
+      } catch (error) {
+        document.getElementById('error-message').innerText = 'An error occurred';
+      }
     });
-});
+  });
 </script>
 </body>
 </html>

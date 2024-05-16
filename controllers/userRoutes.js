@@ -1,8 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('./userController');
+const passport = require('passport');
+const User = require('../models/user');
 
-router.post('/login', userController.loginUser);
-router.post('/register', userController.signupUser);
+router.post('/register', async (req, res) => {
+  const { username, email, password } = req.body;
+  try {
+    const user = new User({ username, email });
+    await User.register(user, password);
+    res.status(201).json({ message: 'User registered' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  res.status(200).json({ message: 'User logged in' });
+});
 
 module.exports = router;
