@@ -98,6 +98,7 @@
                 <button type="submit">S'inscrire</button>
                 <p>Vous avez déjà un compte ? <a href="login.html">Connectez-vous ici.</a></p>
             </form>
+        </div>
     </section>
 
     <script defer>
@@ -107,9 +108,9 @@
     
             function menuBtnChange() {
                 if(sidebar.classList.contains("open")){
-                    closeBtn.classList.replace("bx-menu", "bx-menu-alt-right"); //replacing the icons class
+                    closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
                 } else {
-                    closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); //replacing the icons class
+                    closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
                 }
             }
     
@@ -148,7 +149,7 @@
                         alert(result.data.message); // Handles the email already registered error.
                     } else if (result.status === 201) {
                         alert(result.data.message); // Success message
-                        //window.location.href = '/email-verify.html';
+                        window.location.href = '/login.html';
                     } else {
                         throw new Error(result.data.message); // Any other error
                     }

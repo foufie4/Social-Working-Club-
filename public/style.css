@@ -249,29 +249,32 @@
     margin: 18px
 }
 
+.submit-post {
+    height: 50px;
+}
 .create-post {
     background-color: #fff;
-    padding: 10px;
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin: 40px;
+    margin: 50px;
     display: flex;
     flex-direction: column;
 }
 
 .create-post .input-group textarea {
     width: 100%;
-    padding: 15px;
+    padding: 20px;
     border: 1px solid #ccd0d5;
     border-radius: 18px;
     resize: none;
-    margin-bottom: 10px;
 }
 
-.create-post .file-upload {
+.file-upload-btns {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: baseline;
+    justify-content: center;
+    flex-direction: row;
 }
 
 .create-post .file-upload-label {
@@ -288,13 +291,14 @@
 }
 
 .create-post .submit-post {
-    padding: 8px 16px;
+    padding: 10px 50px;
     background-color: #4267b2;
     color: #fff;
     border: none;
     border-radius: 18px;
     cursor: pointer;
     white-space: nowrap;
+    font-size: 15px;
 }
 
 .create-post .submit-post:hover {
@@ -313,6 +317,8 @@
     display: grid;
     gap: 20px;
     padding: 20px;
+    justify-content: center;
+    justify-items: center;
 }
 
 .post {
@@ -321,6 +327,7 @@
     background-color: #f9f9f9;
     padding: 10px;
     border-radius: 4px;
+    align-items: center;
 }
 
 .post-actions img {

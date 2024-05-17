@@ -60,7 +60,7 @@
             <div class="profile-details">
                 <img src="profile.jpg" alt="Profile" class="profile">
                 <div class="name_job">
-                    <div class="sidebar-name fullname"><%= adminUsername %></div>
+                    <div class="sidebar-name username" id="username-sidebar"></div>
                 </div>
             </div>
             <!-- déconnexion compte -->
@@ -73,17 +73,18 @@
     <div class="text">Social Working Club</div>
 
     <div class="profile-container">
-        <div class="profile-header">
-            <div class="profile-img-container">
-                <img src="default-profile.png" alt="Profile" class="profile-image">
-              </div>
-            <div class="username-container">
-                <div class="name fullname"><%= adminUsername %></div>
-            </div>
-            <div class="profile-bio-container">
-                <p class="bio">This is the user's bio...</p>
-            </div>            
-          </div>       
+    <div class="profile-header">
+      <div class="profile-img-container">
+        <img src="default-profile.png" alt="Profile" class="profile-image">
+      </div>
+      <div class="username-container">
+        <div class="username" id="username"><span id="username"></span></div>
+      </div>
+    </div>
+    <div class="profile-bio-container">
+      <p class="bio">This is the user's bio...</p>
+    </div>
+  </div>       
     </div>
 
     <style>
@@ -94,42 +95,35 @@
             padding: 20px;
             text-align: center;
         }
-
         .profile-settings {
             position: absolute;
             right: 10px;
             top: 10px;
         }
-        
         .profile-header {
             position: relative;
         }
-        
         .profile-image {
             padding: 40px;
             background-color: lightslategray;
             border-radius: 100%;
             margin-bottom: 30px;
         }
-
         .name {
             background-color: lightslategray;
             border-radius: 30px;
             padding: 10px;
             margin: 30px;
         }
-
         .bio {
             background-color: lightslategray;
             border-radius: 30px;
             padding: 20px;
             margin: 30px;
         }
-        
         .username {
             margin: 0;
         }
-        
         .settings-btn {
             position: absolute;
             left: 250px;
@@ -139,32 +133,25 @@
             background: none;
             font-size: 24px;
         }
-        
         .profile-bio {
             background-color: #f0f0f0;
             padding: 15px;
             margin-top: 15px;
         }
-               
-        /* Mobile responsiveness */
         @media screen and (max-width: 768px) {
             .profile-container, .settings-modal {
                 width: 90%;
             }
         }
-
-        /* Style for form within dropdown */
         #settings-form {
             display: flex;
             flex-direction: column;
         }
-
         #settings-form label,
         #settings-form input,
         #settings-form textarea {
             margin-bottom: 10px;
         }
-
         #settings-form button {
             align-self: flex-end;
         }
@@ -206,52 +193,54 @@
             console.error('Fetch error: ', error);
             alert('Une erreur s’est produite: ' + error.message);
         }
-        
-        // Form submission
-        var settingsForm = document.getElementById('settings-form');
-        if (settingsForm) {
-            settingsForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-            });
-        }
-
-        function enableUsernameEdit() {
-            let usernameElement = document.querySelector('.username');
-            let usernameInput = document.createElement('input');
-            usernameInput.type = 'text';
-            usernameInput.className = 'username-input';
-            usernameInput.value = usernameElement.textContent;
-            usernameElement.parentNode.replaceChild(usernameInput, usernameElement);
-        
-            let saveButton = document.createElement('button');
-            saveButton.textContent = 'Save';
-            saveButton.className = 'save-button'; // Assurez-vous que cette classe correspond au CSS que nous avons ajouté
-            saveButton.onclick = () => saveUsername(usernameInput.value);
-        
-            usernameInput.parentNode.insertBefore(saveButton, usernameInput.nextSibling);
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            const response = await fetch('/config');
-            const config = await response.json();
-            document.querySelectorAll('.fullname').forEach(el => el.textContent = config.adminUsername);
-        } catch (error) {
-            console.error('Erreur lors de la récupération de la configuration:', error);
-        }
-    });       
+    });      
 
     document.addEventListener('DOMContentLoaded', () => {
-        const loggedIn = sessionStorage.getItem('loggedIn'); // suppose que l'état de connexion est stocké ici
+        const loggedIn = sessionStorage.getItem('loggedIn');
         const profileLink = document.querySelector('.nav-list .profile a');
         if (loggedIn) {
-            profileLink.href = '/profile.html'; // Change le lien vers le profil de l'utilisateur
+            profileLink.href = '/profil.html';
         } else {
-            profileLink.href = '/login.html'; // Garde le lien vers la page de connexion
+            profileLink.href = '/login.html';
         }
     });    
-       
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');  // Récupérer le nom d'utilisateur
+
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (username) {
+            document.getElementById('username').innerText = username;  // Afficher le nom d'utilisateur
+            document.getElementById('username-sidebar').innerText = username;  // Afficher le nom d'utilisateur dans la sidebar
+        }
+
+        try {
+            const response = await fetch('/user/profil', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                const user = await response.json();
+                document.getElementById('username').innerText = user.username;
+                document.getElementById('username-sidebar').innerText = user.username;
+            } else {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    });
     </script>
 </body>
 </html>
