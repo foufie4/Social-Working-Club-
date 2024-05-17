@@ -1,190 +1,142 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <title>Social Working Club</title>
-  <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-</head>
-<body>
-  <div class="sidebar">
-    <div class="logo-details">
-      <i class='bx bxl-c-plus-plus icon'></i>
-      <div class="logo_name"><?pseudo></div>
-      <i class='bx bx-menu' id="btn"></i>
-    </div>
-    <ul class="nav-list">
-      <li>
-        <i class='bx bx-search'></i>
-        <input type="text" placeholder="Search...">
-        <span class="tooltip">Search</span>
-      </li>
-      <li>
-        <a href="index.html">
-          <i class='bx bx-grid-alt'></i>
-          <span class="links_name">Home</span>
-        </a>
-        <span class="tooltip">Home</span>
-      </li>
-      <li>
-        <a href="register.html">
-          <i class='bx bx-user'></i>
-          <span class="links_name">Profil</span>
-        </a>
-        <span class="tooltip">Profil</span>
-      </li>
-      <li>
-        <a href="#">
-          <i class='bx bx-chat'></i>
-          <span class="links_name">Messages</span>
-        </a>
-        <span class="tooltip">Messages</span>
-      </li>
-      <li>
-        <a href="settings.html">
-          <i class='bx bx-cog'></i>
-          <span class="links_name">Settings</span>
-        </a>
-        <span class="tooltip">Settings</span>
-      </li>
-      <li class="profile">
-        <div class="profile-details">
-          <img src="profile.jpg" alt="profileImg">
-          <div class="name_job">
-            <div class="name"><?pseudo></div>
-          </div>
-        </div>
-        <i class='bx bx-log-out' id="log_out"></i>
-      </li>
-    </ul>
-  </div>
-  <section class="home-section">
-    <div class="text">Social Working Club</div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Social Working Club</title>
+    
+    <!-- Logo -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div class="create-post">
-        <form id="createPostForm" enctype="multipart/form-data">
-        <div class="input-group">
-            <textarea id="postContent" name="content" placeholder="Ecrivez quelque chose..." rows="2"></textarea>
-        </div>
-        <div class="file-upload-btns">
-            <input type="file" id="postImage" accept="image/*" class="file-upload-input">
-            <button type="submit" class="submit-post">Publier</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="posts" id="postsContainer"></div>
-  </section>
-
-  <script defer>
-    let sidebar = document.querySelector(".sidebar");
-    let closeBtn = document.querySelector("#btn");
-    let searchBtn = document.querySelector(".bx-search");
-
-    closeBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      menuBtnChange();
-    });
-
-    searchBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      menuBtnChange();
-    });
-
-    function menuBtnChange() {
-      if (sidebar.classList.contains("open")) {
-        closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-      } else {
-        closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
-      }
-    }
-
-    document.getElementById('createPostForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+   </head>
+    <body>
+        <div class="sidebar">
+            <div class="logo-details">
+              <i class='bx bxl-c-plus-plus icon'></i>
+              <div class="logo_name"><span id="username"></span></div>
+              <i class='bx bx-menu' id="btn"></i>
+            </div>
+            <ul class="nav-list">
+                <li>
+                    <i class='bx bx-search'></i>
+                    <input type="text" placeholder="Search...">
+                    <span class="tooltip">Search</span>
+                </li>
+              <li>
+                <a href="home.html">
+                  <i class='bx bx-grid-alt'></i>
+                  <span class="links_name">Home</span>
+                </a>
+                <span class="tooltip">Home</span>
+              </li>
+              <li>
+                <a href="profil.html">
+                  <i class='bx bx-user'></i>
+                  <span class="links_name">Profil</span>
+                </a>
+                <span id="username"></span>
+              </li>
         
-        const postContent = document.getElementById('postContent').value;
-        const postImage = document.getElementById('postImage').files[0];
-      
-        if (!postContent) {
-          alert('Le contenu de la publication est requis.');
-          return;
-        }
-      
-        const formData = new FormData();
-        formData.append('content', postContent);
-        if (postImage) {
-          formData.append('image', postImage); // Ajouter directement le fichier
-        }
-      
-        async function createPost(formData) {
-          const token = localStorage.getItem('token');
-          if (!token) {
-            alert('Vous devez être connecté pour publier');
-            return;
-          }
-      
-          try {
-            const response = await fetch('/posts/create', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`
-              },
-              body: formData
-            });
-      
-            if (response.ok) {
-              const post = await response.json();
-              displayPost(post);
-              document.getElementById('createPostForm').reset();
-            } else {
-              const errorData = await response.json();
-              alert(errorData.error || 'Erreur lors de la création de la publication');
-            }
-          } catch (error) {
-            console.error('Erreur réseau lors de la création de la publication:', error);
-            alert('Erreur réseau lors de la création de la publication');
-          }
-        }
-      
-        createPost(formData);
-      });      
-  
-      async function fetchPosts() {
-        try {
-          const response = await fetch('/posts');
-          if (response.ok) {
-            const posts = await response.json();
-            posts.forEach(post => displayPost(post));
-          } else {
-            alert('Erreur lors de la récupération des publications');
-          }
-        } catch (error) {
-          alert('Erreur réseau lors de la récupération des publications');
-        }
-      }
-  
-      function displayPost(post) {
-        const postsContainer = document.getElementById('postsContainer');
-        const newPostHtml = `
-          <div class="post">
-            <div class="user-info">
-              <img src="profile.jpg" alt="profile_pic" class="profile-pic">
-              <span class="username">${post.user.username}</span>
-            </div>
-            <p class="message">${post.content}</p>
-            ${post.image ? `<img src="/uploads/${post.image}" alt="post_image">` : ''}
-            <div class="post-action">
-              <img src="like.png" class="like">J'aime</img>
-              <img src="chat.png" class="comment">Commenter</img>
-              <img src="send.png" class="share">Partager</img>
-            </div>
+              <li class="profile">
+                <div class="profile-details">
+                  <img src="profile.jpg" alt="profileImg">
+                  <div class="name_job">
+                    <div class="name"><span id="username"></span></div>
+                  </div>
+                </div>
+                <i class='bx bx-log-out' id="log_out"></i>
+              </li>
+            </ul>
           </div>
-        `;
-        postsContainer.insertAdjacentHTML('afterbegin', newPostHtml);
-      }      
-  
-      document.addEventListener('DOMContentLoaded', fetchPosts);
-  </script>
+          <section class="home-section">
+            <div class="text">Social Working Club</div>
+
+        <div class="form-container">
+            <form id="signup-form" action="/user/register" method="post">
+                <h2>Créer un Compte</h2>
+                <div class="input-container">
+                    <input type="text" id="username" name="username" required placeholder="Username">
+                    <label>Username</label>
+                </div>
+                <div class="input-container">
+                    <input type="email" id="email" required placeholder="Email">
+                    <label>Email</label>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="password" required placeholder="Password">
+                    <label>Mot de passe</label>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                    <label>Confirmer le mot de passe</label>
+                </div>
+                <button type="submit">S'inscrire</button>
+                <p>Vous avez déjà un compte ? <a href="login.html">Connectez-vous ici.</a></p>
+            </form>
+        </div>
+    </section>
+
+    <script defer>
+        let sidebar = document.querySelector(".sidebar");
+        let closeBtn = document.querySelector("#btn");
+        let searchBtn = document.querySelector(".bx-search");
+    
+        closeBtn.addEventListener("click", () => {
+          sidebar.classList.toggle("open");
+          menuBtnChange();
+        });
+    
+        searchBtn.addEventListener("click", () => {
+          sidebar.classList.toggle("open");
+          menuBtnChange();
+        });
+    
+        function menuBtnChange() {
+          if (sidebar.classList.contains("open")) {
+            closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
+          } else {
+            closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
+          }
+        }
+          document.getElementById('signup-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+            
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+
+                fetch('/user/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                })                
+                .then(response => response.json().then(data => ({ status: response.status, data: data })))
+                .then(result => {
+                    if (result.status === 409) {
+                        alert(result.data.message); // Handles the email already registered error.
+                    } else if (result.status === 201) {
+                        alert(result.data.message); // Success message
+                        window.location.href = '/login.html';
+                    } else {
+                        throw new Error(result.data.message); // Any other error
+                    }
+                })
+                .catch(error => {
+                    console.error('Registration failed:', error);
+                    alert('Registration failed: ' + error.message);
+                });
+            });            
+
+    </script>
+
 </body>
 </html>
