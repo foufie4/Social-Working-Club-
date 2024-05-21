@@ -1,23 +1,16 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
 const User = require('../models/user');
-const connectDB = require('../db/connexion');
 
-connectDB();
-
-const checkAdmin = async () => {
+const checkAdmin = async (req, res, next) => {
   try {
-    const admin = await User.findOne({ email: 'admin@example.com' });
-    if (admin) {
-      console.log('Admin user found:', admin);
+    const user = await User.findById(req.user.id);
+    if (user && user.role === 'admin') {
+      next();
     } else {
-      console.log('Admin user not found');
+      res.status(403).json({ error: 'Access denied' });
     }
-    process.exit(0);
   } catch (error) {
-    console.error('Error checking admin user:', error);
-    process.exit(1);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
-checkAdmin();
+module.exports = checkAdmin;
