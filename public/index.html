@@ -19,11 +19,6 @@
               <i class='bx bx-menu' id="btn"></i>
             </div>
             <ul class="nav-list">
-                <li>
-                    <i class='bx bx-search'></i>
-                    <input type="text" placeholder="Search...">
-                    <span class="tooltip">Search</span>
-                </li>
               <li>
                 <a href="home.html">
                   <i class='bx bx-grid-alt'></i>
@@ -41,7 +36,6 @@
         
               <li class="profile">
                 <div class="profile-details">
-                  <img src="profile.jpg" alt="profileImg">
                   <div class="name_job">
                     <div class="name"><span id="username"></span></div>
                   </div>
@@ -54,7 +48,7 @@
             <div class="text">Social Working Club</div>
 
         <div class="form-container">
-            <form id="signup-form" action="/user/register" method="post">
+            <form id="signup-form" action="/user/index" method="post">
                 <h2>Créer un Compte</h2>
                 <div class="input-container">
                     <input type="text" id="username" name="username" required placeholder="Username">
@@ -112,7 +106,7 @@
                     return;
                 }
 
-                fetch('/user/register', {
+                fetch('/user/index', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

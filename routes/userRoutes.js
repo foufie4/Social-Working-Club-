@@ -7,7 +7,7 @@ const authenticateJWT = require('../middleware/authJWT');
 
 const { JWT_SECRET } = process.env;
 
-router.post('/register', UserController.signupUser);
+router.post('/index', UserController.signupUser);
 router.post('/login', UserController.loginUser);
 
 router.get('/profile', authenticateJWT, async (req, res) => {

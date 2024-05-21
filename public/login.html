@@ -3,48 +3,31 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style_connect.css">
+    <link rel="stylesheet" href="style.css">
     <title>Social Working Club</title>
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
   </head>
   <body>
     <div class="sidebar">
       <div class="logo-details">
-        <i class='bx bx-menu' id="btn" ></i>
+        <i class='bx bxl-c-plus-plus icon'></i>
+        <div class="logo_name"><span id="username"></span></div>
+        <i class='bx bx-menu' id="btn"></i>
       </div>
       <ul class="nav-list">
         <li>
-          <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search...">
-          <span class="tooltip">Search</span>
-        </li>
-        <li>
-          <a href="index.html">
+          <a href="home.html">
             <i class='bx bx-grid-alt'></i>
             <span class="links_name">Home</span>
           </a>
           <span class="tooltip">Home</span>
         </li>
         <li>
-          <a href="connexion.html">
+          <a href="profil.html">
             <i class='bx bx-user'></i>
             <span class="links_name">Profil</span>
           </a>
-          <span class="tooltip">Profil</span>
-        </li>
-        <li>
-          <a href="#">
-            <i class='bx bx-chat'></i>
-            <span class="links_name">Messages</span>
-          </a>
-          <span class="tooltip">Messages</span>
-        </li>
-        <li>
-          <a href="settings.html">
-            <i class='bx bx-cog'></i>
-            <span class="links_name">Settings</span>
-          </a>
-          <span class="tooltip">Settings</span>
+          <span id="username"></span>
         </li>
         <li class="profile">
           <div class="profile-details">
@@ -72,7 +55,7 @@
             <label for="password">Mot de passe</label>
           </div>
           <button type="submit">Se connecter</button>
-          <p>Pas encore de compte ? <a href="register.html">Créez-en un ici.</a></p>
+          <p>Pas encore de compte ? <a href="index.html">Créez-en un ici.</a></p>
         </form>
         <div id="error-message" style="color: red;"></div>
       </div>
