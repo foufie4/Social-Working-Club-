@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const UserRouter = require('./routes/userRoutes');
 const PostRouter = require('./routes/postRoutes');
+const AdminRouter = require('./routes/adminRoutes');
 const connectDB = require('./db/connexion');
 const { log } = require('mercedlogger');
 const jwt = require('jsonwebtoken');
@@ -36,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/user', UserRouter);
 app.use('/posts', upload.single('image'), PostRouter);
+app.use('/admin', AdminRouter);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
