@@ -70,7 +70,6 @@
     <script defer>
             let sidebar = document.querySelector(".sidebar");
             let closeBtn = document.querySelector("#btn");
-            let searchBtn = document.querySelector(".bx-search");
     
             function menuBtnChange() {
                 if(sidebar.classList.contains("open")){
@@ -84,12 +83,7 @@
                 sidebar.classList.toggle("open");
                 menuBtnChange(); //calling the function(optional)
             });
-    
-            searchBtn.addEventListener("click", ()=>{ // Sidebar open when you click on the search icon
-                sidebar.classList.toggle("open");
-                menuBtnChange(); //calling the function(optional)
-            });
-    
+
             document.getElementById('signup-form').addEventListener('submit', function(event) {
                 event.preventDefault();
                 const username = document.getElementById('username').value;

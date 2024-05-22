@@ -11,7 +11,7 @@
     <div class="sidebar">
       <div class="logo-details">
         <i class='bx bxl-c-plus-plus icon'></i>
-        <div class="logo_name"><span id="username"></span></div>
+        <div class="logo_name"><span id="display-username"></span></div>
         <i class='bx bx-menu' id="btn"></i>
       </div>
       <ul class="nav-list">
@@ -27,7 +27,7 @@
             <i class='bx bx-user'></i>
             <span class="links_name">Profil</span>
           </a>
-          <span id="username"></span>
+          <span id="display-username"></span>
         </li>
         <li class="profile">
           <div class="profile-details">
@@ -45,16 +45,17 @@
       <div class="form-container">
 
         <form id="login-form" action="/user/login" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <h2>Connexion</h2>
           <div class="input-container">
-            <input type="text" id="username" name="username" required>
-            <label for="username">Username</label>
+            <input type="text" id="username-input" name="username" required>
+            <label for="username-input">Username</label>
           </div>
           <div class="input-container">
             <input type="password" id="password" name="password" required>
             <label for="password">Mot de passe</label>
           </div>
-          <button type="submit">Se connecter</button>
+          <button type="submit" id="loginButton">Se connecter</button>
           <p>Pas encore de compte ? <a href="index.html">Créez-en un ici.</a></p>
         </form>
         <div id="error-message" style="color: red;"></div>
@@ -64,14 +65,8 @@
     <script defer>
       let sidebar = document.querySelector(".sidebar");
       let closeBtn = document.querySelector("#btn");
-      let searchBtn = document.querySelector(".bx-search");
 
       closeBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("open");
-        menuBtnChange();
-      });
-
-      searchBtn.addEventListener("click", () => {
         sidebar.classList.toggle("open");
         menuBtnChange();
       });
