@@ -48,11 +48,11 @@ app.use('/user', UserRouter);
 app.use('/posts', upload.single('image'), PostRouter);
 app.use('/admin', AdminRouter);
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/', csrfProtection, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), { csrfToken: req.csrfToken() });
 });
 
-app.get('/profil.html', (req, res) => {
+app.get('/profil.html', csrfProtection, (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     console.log('No token provided');
@@ -64,15 +64,15 @@ app.get('/profil.html', (req, res) => {
       console.log('Invalid token');
       return res.status(401).json({ error: 'Invalid token' });
     }
-    res.sendFile(path.join(__dirname, 'public', 'profil.html'));
+    res.sendFile(path.join(__dirname, 'public', 'profil.html'), { csrfToken: req.csrfToken() });
   });
 });
 
-app.get('/logout', (req, res) => {
+app.get('/logout', csrfProtection, (req, res) => {
   res.redirect('/login');
 });
 
-app.get('/form', (req, res) => {
+app.get('/form', csrfProtection, (req, res) => {
   res.render('send', { csrfToken: req.csrfToken() });
 });
 

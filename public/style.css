@@ -238,7 +238,7 @@
 
 .form-container {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
     grid-gap: 2rem;
 }
