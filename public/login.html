@@ -1,68 +1,65 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Social Working Club</title>
-    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-  </head>
-  <body>
-    <div class="sidebar">
-      <div class="logo-details">
-        <i class='bx bxl-c-plus-plus icon'></i>
-        <div class="logo_name"><span id="display-username"></span></div>
-        <i class='bx bx-menu' id="btn"></i>
-      </div>
-      <ul class="nav-list">
-        <li>
-          <a href="home.html">
-            <i class='bx bx-grid-alt'></i>
-            <span class="links_name">Home</span>
-          </a>
-          <span class="tooltip">Home</span>
-        </li>
-        <li>
-          <a href="profil.html">
-            <i class='bx bx-user'></i>
-            <span class="links_name">Profil</span>
-          </a>
-          <span id="display-username"></span>
-        </li>
-        <li class="profile">
-          <div class="profile-details">
-            <img src="profile.jpg" alt="profileImg">
-            <div class="name_job">
-              <div class="sidebar-name fullname">pseudo</div>
-            </div>
-          </div>
-          <i class='bx bx-log-out' id="log_out"></i>
-        </li>
-      </ul>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Social Working Club</title>
+  <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo-details">
+      <i class='bx bxl-c-plus-plus icon'></i>
+      <div class="logo_name"><span id="usernameDisplay"></span></div>
+      <i class='bx bx-menu' id="btn"></i>
     </div>
-    <section class="home-section">
-      <div class="text">Social Working Club</div>
-      <div class="form-container">
-
-        <form id="login-form" action="/user/login" method="post">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <h2>Connexion</h2>
-          <div class="input-container">
-            <input type="text" id="username-input" name="username" required>
-            <label for="username-input">Username</label>
+    <ul class="nav-list">
+      <li>
+        <a href="home.html">
+          <i class='bx bx-grid-alt'></i>
+          <span class="links_name">Home</span>
+        </a>
+        <span class="tooltip">Home</span>
+      </li>
+      <li>
+        <a href="profil.html">
+          <i class='bx bx-user'></i>
+          <span class="links_name">Profil</span>
+        </a>
+        <span id="usernameDisplay"></span>
+      </li>
+      <li class="profile">
+        <div class="profile-details">
+          <img src="profile.jpg" alt="profileImg">
+          <div class="name_job">
+            <div class="sidebar-name fullname">pseudo</div>
           </div>
-          <div class="input-container">
-            <input type="password" id="password" name="password" required>
-            <label for="password">Mot de passe</label>
-          </div>
-          <button type="submit" id="loginButton">Se connecter</button>
-          <p>Pas encore de compte ? <a href="index.html">Créez-en un ici.</a></p>
-        </form>
+        </div>
+        <i class='bx bx-log-out' id="log_out"></i>
+      </li>
+    </ul>
+  </div>
+  <section class="home-section">
+    <div class="text">Social Working Club</div>
+    <div class="form-container">
+      <form id="login-form" action="/user/login" method="post">
+        <h2>Connexion</h2>
+        <div class="input-container">
+          <input type="text" id="username" name="username" required>
+          <label for="username">Username</label>
+        </div>
+        <div class="input-container">
+          <input type="password" id="password" name="password" required>
+          <label for="password">Mot de passe</label>
+        </div>
+        <button type="submit" id="loginButton">Se connecter</button>
+        <p>Pas encore de compte ? <a href="index.html">Créez-en un ici.</a></p>
         <div id="error-message" style="color: red;"></div>
-      </div>
-    </section>
-    <script src="login.js"></script>
-    <script defer>
+      </form>
+    </div>
+  </section>
+  <script defer>
       let sidebar = document.querySelector(".sidebar");
       let closeBtn = document.querySelector("#btn");
 
@@ -78,6 +75,40 @@
           closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
         }
       }
-    </script>
-  </body>
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', async function(event) {
+          event.preventDefault();
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+      
+          console.log(`Attempting to login with username: ${username} and password: ${password}`);
+      
+          try {
+            const response = await fetch('/user/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username, password })
+            });
+      
+            if (response.status === 401) {
+              document.getElementById('error-message').innerText = 'Invalid username or password';
+            } else if (response.ok) {
+              const data = await response.json();
+              localStorage.setItem('token', data.token); // Store the token
+              window.location.href = '/home.html'; // Redirect to the homepage
+            } else {
+              const errorData = await response.json();
+              document.getElementById('error-message').innerText = errorData.message || 'Login failed';
+            }
+          } catch (error) {
+            document.getElementById('error-message').innerText = 'Error during login';
+          }
+        });
+      });
+  </script>
+</body>
 </html>
