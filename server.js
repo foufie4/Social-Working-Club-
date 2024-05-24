@@ -7,6 +7,7 @@ const { log } = require('mercedlogger');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const UserRouter = require('./routes/userRoutes');
 const PostRouter = require('./routes/postRoutes');
@@ -23,6 +24,7 @@ app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {

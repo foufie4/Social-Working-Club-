@@ -43,7 +43,7 @@
   <section class="home-section">
     <div class="text">Social Working Club</div>
     <div class="form-container">
-      <form id="login-form" action="/user/login" method="post">
+      <form id="login-form" action="/auth/login" method="post">
         <h2>Connexion</h2>
         <div class="input-container">
           <input type="text" id="username" name="username" required>
@@ -76,38 +76,31 @@
         }
       }
 
-      document.addEventListener('DOMContentLoaded', function () {
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', async function(event) {
-          event.preventDefault();
-          const username = document.getElementById('username').value;
-          const password = document.getElementById('password').value;
-      
-          console.log(`Attempting to login with username: ${username} and password: ${password}`);
-      
-          try {
-            const response = await fetch('/user/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ username, password })
-            });
-      
-            if (response.status === 401) {
-              document.getElementById('error-message').innerText = 'Invalid username or password';
-            } else if (response.ok) {
-              const data = await response.json();
-              localStorage.setItem('token', data.token); // Store the token
-              window.location.href = '/home.html'; // Redirect to the homepage
-            } else {
-              const errorData = await response.json();
-              document.getElementById('error-message').innerText = errorData.message || 'Login failed';
-            }
-          } catch (error) {
-            document.getElementById('error-message').innerText = 'Error during login';
+      document.getElementById('login-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+  
+        console.log(`Attempting to login with email: ${email} and password: ${password}`);
+        
+        try {
+          const response = await fetch('/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+  
+          if (response.status === 401) {
+            alert('Invalid email or password');
+          } else if (response.ok) {
+            const data = await response.json();
+            alert('Login successful');
+          } else {
+            alert('Login failed');
           }
-        });
+        } catch (error) {
+          alert('Error during login');
+        }
       });
   </script>
 </body>

@@ -6,7 +6,7 @@ const UserController = require('../controllers/userController');
 router.post('/index', UserController.signupUser);
 router.post('/login', UserController.loginUser);
 
-router.get('/profil', authenticateJWT, async (req, res) => {
+router.get('/profile', authenticateJWT, async (req, res) => {
   try {
     const user = await user.findById(req.user.id).select('-password');
     if (!user) {
