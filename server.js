@@ -7,7 +7,6 @@ const { log } = require('mercedlogger');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-const mongoose = require('mongoose');
 
 const UserRouter = require('./routes/userRoutes');
 const PostRouter = require('./routes/postRoutes');
@@ -24,7 +23,6 @@ app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.json());
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -45,6 +43,37 @@ app.use('/admin', AdminRouter);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.post('/user/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await user.findOne({ email });
+
+    if (!user || !user.comparePassword(password)) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+    // Generate a token or handle successful login
+    const token = generateToken(user); // Your token generation logic
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/user/profil', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await user.findById(decoded.id).select('-password');
+    res.json(user);
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
 });
 
 app.get('/profil.html', (req, res) => {

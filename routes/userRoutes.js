@@ -3,10 +3,10 @@ const router = express.Router();
 const authenticateJWT = require('../middleware/authJWT');
 const UserController = require('../controllers/userController');
 
-router.post('/index', UserController.signupUser);
+router.post('/register', UserController.registerUser);
 router.post('/login', UserController.loginUser);
 
-router.get('/profile', authenticateJWT, async (req, res) => {
+router.get('/profil', authenticateJWT, async (req, res) => {
   try {
     const user = await user.findById(req.user.id).select('-password');
     if (!user) {

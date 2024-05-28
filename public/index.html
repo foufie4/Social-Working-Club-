@@ -42,7 +42,7 @@
     <section class="home-section">
       <div class="text">Social Working Club</div>
       <div class="form-container">
-        <form id="register-form" action="/auth/register" method="post">
+        <form id="signup-form" action="/auth/register" method="post">
           <h2>Créer un Compte</h2>
           <div class="input-container">
             <input type="text" id="username" name="username" required placeholder="Username">
@@ -82,7 +82,7 @@
         }
       }
     
-      document.getElementById('register-form').addEventListener('submit', function(event) {
+      document.getElementById('signup-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const username = document.getElementById('username').value;
         const email = document.getElementById('email').value;
@@ -97,10 +97,11 @@
         const payload = { username, email, password };
         console.log('Payload:', JSON.stringify(payload)); // Log the payload
 
-        fetch('/auth/register', {
+        fetch('/user/index', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password }),
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify(payload)
         })
         .then(response => {

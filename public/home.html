@@ -34,10 +34,10 @@
         <div class="profile-details">
           <img src="profile.jpg" alt="profileImg">
           <div class="name_job">
-            <div class="name"><span id="username"></span></div>
+            <div id="usernameDisplay"></div>
           </div>
         </div>
-        <i class='bx bx-log-out' id="log_out"></i>
+        <i class='bx bx-log-out' id="log_out"><button id="logoutButton">Logout</button></i>
       </li>
     </ul>
   </div>
@@ -144,6 +144,7 @@
         const newPostHtml = `
           <div class="post">
             <div class="user-info">
+              <p>Posted by: <span id="postUsername"></span></p>
               <img src="profile.jpg" alt="profile_pic" class="profile-pic">
               <span class="username">${post.user.username}</span>
             </div>
@@ -160,6 +161,23 @@
       }      
   
       document.addEventListener('DOMContentLoaded', fetchPosts);
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+    
+        if (token && username) {
+          document.getElementById('usernameDisplay').textContent = username;
+        } else {
+          window.location.href = 'login.html';
+        }
+      });
+
+      document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        window.location.href = 'login.html'; // Redirect to login page
+      });
   </script>
 </body>
 </html>

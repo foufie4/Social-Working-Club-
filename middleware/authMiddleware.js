@@ -18,4 +18,4 @@ function ensureAuthenticated(req, res, next) {
     next();
 }
 
-module.exports = { redirectIfAuthenticated, ensureAuthenticated };
+module.exports = { triggerVerification, redirectIfAuthenticated, ensureAuthenticated };

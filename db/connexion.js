@@ -2,11 +2,11 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const { log } = require('mercedlogger');
 
-const { DATABASE_URL } = process.env;
+const { MONGO_URI } = process.env;
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(DATABASE_URL);
+    await mongoose.connect(MONGO_URI);
     log.green('DATABASE STATE', 'Connection Open');
   } catch (error) {
     log.red('DATABASE STATE', error);

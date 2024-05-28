@@ -5,86 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Profil</title>
-
-    <!-- Logo -->
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    <!-- SIDEBAR -->
     <div class="sidebar">
-        <!-- titre + logo de la sidebar -->
         <div class="logo-details">
-                <i class='bx bx-menu' id="btn" ></i>
+            <i class='bx bx-menu' id="btn"></i>
         </div>
-        <!-- sidebar list -->
         <ul class="nav-list">
-        <!-- <li>
-            <i class='bx bx-search'></i>
-            <input type="text" placeholder="Search...">
-            <span class="tooltip">Search</span>
-        </li> -->
-        <li>
-            <a href="index.html">
-              <i class='bx bx-grid-alt'></i>
-              <span class="links_name">Home</span>
-            </a>
-             <span class="tooltip">Home</span>
-        </li>
-        <!-- profil des users -->
-        <li>
-            <a href="index.html">
-            <i class='bx bx-user'></i>
-            <span class="links_name">Profil</span>
-        </a>
-        <span class="tooltip">Profil</span>
-        <!-- messages privés -->
-        </li>
-        <!-- <li>
-            <a href="#">
-            <i class='bx bx-chat'></i>
-            <span class="links_name">Messages</span>
-        </a>
-        <span class="tooltip">Messages</span>
-        </li> -->
-        <!-- paramètre -->
-        <li>
-            <a href="settings.html">
-            <i class='bx bx-cog'></i>
-            <span class="links_name">Settings</span>
-        </a>
-        <span class="tooltip">Settings</span>
-        </li>
-        <!-- profil -->
-        <li class="profile">
-            <div class="profile-details">
-                <img src="profile.jpg" alt="Profile" class="profile">
-                <div class="name_job">
-                    <div class="sidebar-name username" id="username-sidebar"></div>
+            <li>
+                <a href="home.html">
+                    <i class='bx bx-grid-alt'></i>
+                    <span class="links_name">Home</span>
+                </a>
+                <span class="tooltip">Home</span>
+            </li>
+            <li>
+                <a href="profil.html">
+                    <i class='bx bx-user'></i>
+                    <span class="links_name">Profil</span>
+                </a>
+                <span class="tooltip">Profil</span>
+            </li>
+            <li>
+                <a href="index.html">
+                    <i class='bx bx-log-in'></i>
+                    <span class="links_name">Connexion</span>
+                </a>
+                <span class="tooltip">Connexion</span>
+            </li>
+            <li class="profile">
+                <div class="profile-details">
+                    <img src="profile.jpg" alt="Profile" class="profile">
+                    <div class="name_job">
+                        <div class="sidebar-name username" id="username-sidebar"></div>
+                    </div>
                 </div>
-            </div>
-            <!-- déconnexion compte -->
-            <i class='bx bx-log-out' id="log_out"></i>
-        </li>
+            </li>
         </ul>
     </div>
-<!-- TITRE -->
-<section class="home-section">
-    <div class="text">Social Working Club</div>
-
-    <div class="profile-container">
-    <div class="profile-header">
-      <div class="profile-img-container">
-        <img src="default-profile.png" alt="Profile" class="profile-image">
-      </div>
-      <div class="username-container">
-        <div class="username" id="username"><span id="username"></span></div>
-      </div>
-    </div>
-    <div class="profile-bio-container">
-      <p class="bio">This is the user's bio...</p>
-    </div>
-  </div>       
-    </div>
+    <section class="home-section">
+        <div class="text">Social Working Club</div>
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-img-container">
+                    <img src="default-profile.png" alt="Profile" class="profile-image">
+                </div>
+                <div class="username-container">
+                    <div class="username" id="profileUsername"></div>
+                </div>
+            </div>
+            <button id="logoutButton">Logout</button>
+        </div>
+    </section>
 
     <style>
         .profile-container {
@@ -158,15 +131,14 @@
 
     <script defer>
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar logic
             let sidebar = document.querySelector(".sidebar");
             let closeBtn = document.querySelector("#btn");
-        
+
             closeBtn.addEventListener("click", () => {
                 sidebar.classList.toggle("open");
                 menuBtnChange();
             });
-        
+
             function menuBtnChange() {
                 if (sidebar.classList.contains("open")) {
                     closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
@@ -175,65 +147,25 @@
                 }
             }
 
-        function handleResponse(response) {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json(); // Nous supposons ici que le serveur renvoie du JSON
-        }
-        
-        function handleError(error) {
-            console.error('Fetch error: ', error);
-            alert('Une erreur s’est produite: ' + error.message);
-        }
-    });      
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const loggedIn = sessionStorage.getItem('loggedIn');
-        const profileLink = document.querySelector('.nav-list .profile a');
-        if (loggedIn) {
-            profileLink.href = '/profil.html';
-        } else {
-            profileLink.href = '/login.html';
-        }
-    });    
+            console.log("Token: ", token);
+            console.log("Username: ", username);
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        const token = localStorage.getItem('token');
-        const username = localStorage.getItem('username');  // Récupérer le nom d'utilisateur
-
-        if (!token) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        if (username) {
-            document.getElementById('username').innerText = username;  // Afficher le nom d'utilisateur
-            document.getElementById('username-sidebar').innerText = username;  // Afficher le nom d'utilisateur dans la sidebar
-        }
-
-        try {
-            const response = await fetch('/user/profil', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (response.ok) {
-                const user = await response.json();
-                document.getElementById('username').innerText = user.username;
-                document.getElementById('username-sidebar').innerText = user.username;
+            if (token && username) {
+                document.getElementById('username-sidebar').textContent = username;
+                document.getElementById('profileUsername').textContent = username;
             } else {
-                localStorage.removeItem('token');
                 window.location.href = 'login.html';
             }
-        } catch (error) {
-            console.error('Error fetching profile:', error);
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
-        }
-    });
+
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = 'login.html';
+            });
+        });
     </script>
 </body>
 </html>
