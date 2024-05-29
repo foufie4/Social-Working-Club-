@@ -11,7 +11,7 @@
   <div class="sidebar">
     <div class="logo-details">
       <i class='bx bxl-c-plus-plus icon'></i>
-      <div class="logo_name"><span id="username"></span></div>
+      <div class="logo_name"></div>
       <i class='bx bx-menu' id="btn"></i>
     </div>
     <ul class="nav-list">
@@ -27,9 +27,8 @@
           <i class='bx bx-user'></i>
           <span class="links_name">Profil</span>
         </a>
-        <span id="username"></span>
+        <span class="tooltip">Profil</span>
       </li>
-
       <li class="profile">
         <div class="profile-details">
           <img src="profile.jpg" alt="profileImg">
@@ -37,21 +36,19 @@
             <div id="usernameDisplay"></div>
           </div>
         </div>
-        <i class='bx bx-log-out' id="log_out"><button id="logoutButton">Logout</button></i>
       </li>
     </ul>
   </div>
   <section class="home-section">
     <div class="text">Social Working Club</div>
-
     <div class="create-post">
-        <form id="createPostForm">
+      <form id="createPostForm">
         <div class="input-group">
-            <textarea id="postContent" name="content" placeholder="Ecrivez quelque chose..." rows="2"></textarea>
+          <textarea id="postContent" name="content" placeholder="Ecrivez quelque chose..." rows="2"></textarea>
         </div>
         <div class="file-upload-btns">
-            <input type="file" id="postImage" accept="image/*" class="file-upload-input">
-            <button type="submit" class="submit-post">Publier</button>
+          <input type="file" id="postImage" accept="image/*" class="file-upload-input">
+          <button type="submit" class="submit-post">Publier</button>
         </div>
       </form>
     </div>
@@ -74,109 +71,116 @@
         closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
       }
     }
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        fetch('/user/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.username) {
+            localStorage.setItem('username', data.username);
+            document.getElementById('usernameDisplay').textContent = data.username;
+            fetchPosts();
+          } else {
+            window.location.href = 'login.html';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+          window.location.href = '/login.html';
+        });
+      } else {
+        window.location.href = '/login.html';
+      }
+    });
+
+    async function fetchPosts() {
+      try {
+        const response = await fetch('/posts');
+        if (response.ok) {
+          const posts = await response.json();
+          posts.forEach(post => displayPost(post));
+        } else {
+          alert('Erreur lors de la récupération des publications');
+        }
+      } catch (error) {
+        console.error('Erreur réseau lors de la récupération des publications:', error);
+        alert('Erreur réseau lors de la récupération des publications');
+      }
+    }
+
+    function displayPost(post) {
+      const postsContainer = document.getElementById('postsContainer');
+      const newPostHtml = `
+        <div class="post">
+          <div class="user-info">
+            <div class="username">${post.user.username}</div>
+            <img src="profile.jpg" alt="profile_pic" class="profile-pic">
+          </div>
+          <p class="message">${post.content}</p>
+          ${post.image ? `<img src="/uploads/${post.image}" alt="post_image">` : ''}
+          <div class="post-action">
+            <img src="img/like.png" class="like"></img>
+            <img src="img/chat.png" class="comment"></img>
+            <img src="img/send.png" class="share"></img>
+          </div>
+        </div>
+      `;
+      postsContainer.insertAdjacentHTML('afterbegin', newPostHtml);
+    }
 
     document.getElementById('createPostForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const postContent = document.getElementById('postContent').value;
-        const postImage = document.getElementById('postImage').files[0];
+      e.preventDefault();
       
-        if (!postContent) {
-          alert('Le contenu de la publication est requis.');
-          return;
-        }
-      
-        const formData = new FormData();
-        formData.append('content', postContent);
-        if (postImage) {
-          formData.append('image', postImage); // Ajouter directement le fichier
-        }
-      
-        async function createPost(formData) {
-          const token = localStorage.getItem('token');
-          if (!token) {
-            alert('Vous devez être connecté pour publier');
-            return;
-          }
-      
-          try {
-            const response = await fetch('/posts/create', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`
-              },
-              body: formData
-            });
-      
-            if (response.ok) {
-              const post = await response.json();
-              displayPost(post);
-              document.getElementById('createPostForm').reset();
-            } else {
-              const errorData = await response.json();
-              alert(errorData.error || 'Erreur lors de la création de la publication');
-            }
-          } catch (error) {
-            console.error('Erreur réseau lors de la création de la publication:', error);
-            alert('Erreur réseau lors de la création de la publication');
-          }
-        }
-      
-        createPost(formData);
-      });      
-  
-      async function fetchPosts() {
-        try {
-          const response = await fetch('/posts');
-          if (response.ok) {
-            const posts = await response.json();
-            posts.forEach(post => displayPost(post));
-          } else {
-            alert('Erreur lors de la récupération des publications');
-          }
-        } catch (error) {
-          alert('Erreur réseau lors de la récupération des publications');
-        }
-      }
-  
-      function displayPost(post) {
-        const postsContainer = document.getElementById('postsContainer');
-        const newPostHtml = `
-          <div class="post">
-            <div class="user-info">
-              <div class="username" id="profileUsername"></div>
-              <img src="profile.jpg" alt="profile_pic" class="profile-pic">
-            </div>
-            <p class="message">${post.content}</p>
-            ${post.image ? `<img src="/uploads/${post.image}" alt="post_image">` : ''}
-            <div class="post-action">
-              <img src="like.png" class="like">J'aime</img>
-              <img src="chat.png" class="comment">Commenter</img>
-              <img src="send.png" class="share">Partager</img>
-            </div>
-          </div>
-        `;
-        postsContainer.insertAdjacentHTML('afterbegin', newPostHtml);
-      }      
-  
-      document.addEventListener('DOMContentLoaded', fetchPosts);
-
-      document.addEventListener('DOMContentLoaded', function() {
-        const token = localStorage.getItem('token');
-        const username = localStorage.getItem('username');
+      const postContent = document.getElementById('postContent').value;
+      const postImage = document.getElementById('postImage').files[0];
     
-        if (token && username) {
-          document.getElementById('usernameDisplay').textContent = username;
-        } else {
-          window.location.href = 'login.html';
-        }
-      });
+      if (!postContent) {
+        alert('Le contenu de la publication est requis.');
+        return;
+      }
+    
+      const formData = new FormData();
+      formData.append('content', postContent);
+      if (postImage) {
+        formData.append('image', postImage);
+      }
+    
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Vous devez être connecté pour publier');
+        return;
+      }
 
-      document.getElementById('logoutButton').addEventListener('click', function() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        window.location.href = 'login.html'; // Redirect to login page
-      });
+      try {
+        const response = await fetch('/posts/create', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (response.ok) {
+          const post = await response.json();
+          displayPost(post);
+          document.getElementById('createPostForm').reset();
+        } else {
+          const errorData = await response.json();
+          alert(errorData.error || 'Erreur lors de la création de la publication');
+        }
+      } catch (error) {
+        console.error('Erreur réseau lors de la création de la publication:', error);
+        alert('Erreur réseau lors de la création de la publication');
+      }
+    });
   </script>
 </body>
 </html>
