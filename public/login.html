@@ -94,6 +94,8 @@
         if (response.ok) {
           console.log('Login successful!');
           console.log('Token:', data.token);
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('username', data.username);
           window.location.href = '/profil.html';
         } else {
           console.log('Login failed:', data.error);

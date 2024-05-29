@@ -144,9 +144,8 @@
         const newPostHtml = `
           <div class="post">
             <div class="user-info">
-              <p>Posted by: <span id="postUsername"></span></p>
+              <div class="username" id="profileUsername"></div>
               <img src="profile.jpg" alt="profile_pic" class="profile-pic">
-              <span class="username">${post.user.username}</span>
             </div>
             <p class="message">${post.content}</p>
             ${post.image ? `<img src="/uploads/${post.image}" alt="post_image">` : ''}

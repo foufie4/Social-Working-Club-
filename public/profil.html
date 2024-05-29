@@ -133,39 +133,58 @@
         document.addEventListener('DOMContentLoaded', function() {
             let sidebar = document.querySelector(".sidebar");
             let closeBtn = document.querySelector("#btn");
-
+        
             closeBtn.addEventListener("click", () => {
-                sidebar.classList.toggle("open");
-                menuBtnChange();
+              sidebar.classList.toggle("open");
+              menuBtnChange();
             });
-
+        
             function menuBtnChange() {
-                if (sidebar.classList.contains("open")) {
-                    closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-                } else {
-                    closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
-                }
+              if (sidebar.classList.contains("open")) {
+                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
+              } else {
+                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
+              }
             }
-
+        
             const token = localStorage.getItem('token');
-            const username = localStorage.getItem('username');
-
-            console.log("Token: ", token);
-            console.log("Username: ", username);
-
-            if (token && username) {
-                document.getElementById('username-sidebar').textContent = username;
-                document.getElementById('profileUsername').textContent = username;
+        
+            if (token) {
+              fetch('/user/me', {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                }
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Failed to fetch user data');
+                }
+                return response.json();
+              })
+              .then(data => {
+                if (data.username) {
+                  document.getElementById('username-sidebar').textContent = data.username;
+                  document.getElementById('profileUsername').textContent = data.username;
+                } else {
+                  window.location.href = 'login.html';
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching user data:', error);
+                window.location.href = 'login.html';
+              });
             } else {
-                window.location.href = 'login.html';
+              window.location.href = 'login.html';
             }
-
+        
             document.getElementById('logoutButton').addEventListener('click', function() {
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                window.location.href = 'login.html';
+              localStorage.removeItem('token');
+              localStorage.removeItem('username');
+              window.location.href = 'login.html';
             });
-        });
+          });
     </script>
 </body>
 </html>
