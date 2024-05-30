@@ -101,10 +101,10 @@
           localStorage.setItem('token', data.token);
           localStorage.setItem('username', data.username);
           window.location.href = '/profil.html';
-        } else {
+      } else {
           console.log('Login failed:', data.error);
           document.getElementById('error-message').innerText = `Login failed: ${data.error}`;
-        }
+      }
       } catch (error) {
         console.error('Error:', error);
         document.getElementById('error-message').innerText = 'An error occurred. Please try again later.';

@@ -10,6 +10,8 @@
 <body>
   <div class="sidebar">
     <div class="logo-details">
+      <i class='bx bxl-c-plus-plus icon'></i>
+      <div class="logo_name"></div>
       <i class='bx bx-menu' id="btn"></i>
     </div>
     <ul class="nav-list">
@@ -27,21 +29,14 @@
         </a>
         <span class="tooltip">Profil</span>
       </li>
-      <li>
-        <a href="index.html">
-            <i class='bx bx-log-in'></i>
-            <span class="links_name">Connexion</span>
-        </a>
-        <span class="tooltip">Connexion</span>
-      </li>
       <li class="profile">
         <div class="profile-details">
-            <img src="profile.jpg" alt="Profile" class="profile">
-            <div class="name_job">
-                <div class="sidebar-name username" id="username-sidebar"></div>
-            </div>
+          <img src="default-profile.png" alt="profileImg" id="sidebarProfileImage">
+          <div class="name_job">
+            <div id="usernameDisplay"></div>
+          </div>
         </div>
-    </li>
+      </li>
     </ul>
   </div>
   <section class="home-section">
@@ -61,49 +56,37 @@
   </section>
 
   <script defer>
-    let sidebar = document.querySelector(".sidebar");
-    let closeBtn = document.querySelector("#btn");
-
-    closeBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      menuBtnChange();
-    });
-
-    function menuBtnChange() {
-      if (sidebar.classList.contains("open")) {
-        closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-      } else {
-        closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
-      }
-    }
     document.addEventListener('DOMContentLoaded', function() {
-      const token = localStorage.getItem('token');
-      
-      if (token) {
-        fetch('/user/me', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.username) {
-            localStorage.setItem('username', data.username);
-            document.getElementById('usernameDisplay').textContent = data.username;
-            fetchPosts();
-          } else {
+        const token = localStorage.getItem('token');
+        
+        if (token) {
+            fetch('/user/me', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.username) {
+                    localStorage.setItem('username', data.username);
+                    document.getElementById('usernameDisplay').textContent = data.username;
+                    if (data.profileImage) {
+                        document.getElementById('sidebarProfileImage').src = `/uploads/${data.profileImage}`;
+                    }
+                    fetchPosts();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+                window.location.href = 'login.html';
+            });
+        } else {
             window.location.href = 'login.html';
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching user data:', error);
-          window.location.href = '/login.html';
-        });
-      } else {
-        window.location.href = '/login.html';
-      }
+        }
     });
 
     async function fetchPosts() {
@@ -127,14 +110,14 @@
         <div class="post">
           <div class="user-info">
             <div class="username">${post.user.username}</div>
-            <img src="profile.jpg" alt="profile_pic" class="profile-pic">
+            <img src="/uploads/${post.user.profileImage || 'default-profile.png'}" alt="profile_pic" class="profile-pic">
           </div>
           <p class="message">${post.content}</p>
           ${post.image ? `<img src="/uploads/${post.image}" alt="post_image">` : ''}
           <div class="post-action">
-            <img src="img/like.png" class="like"></img>
-            <img src="img/chat.png" class="comment"></img>
-            <img src="img/send.png" class="share"></img>
+            <img src="like.png" class="like">J'aime</img>
+            <img src="chat.png" class="comment">Commenter</img>
+            <img src="send.png" class="share">Partager</img>
           </div>
         </div>
       `;
@@ -185,6 +168,12 @@
         console.error('Erreur réseau lors de la création de la publication:', error);
         alert('Erreur réseau lors de la création de la publication');
       }
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      window.location.href = '/login.html';
     });
   </script>
 </body>

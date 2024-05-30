@@ -439,3 +439,8 @@ a {
 .post-actions hover {
     opacity: 0.8;
 }
+
+.username {
+    height: 50px;
+    font-size: 20px;
+}
