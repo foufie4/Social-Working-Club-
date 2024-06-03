@@ -5,86 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Profil</title>
-
-    <!-- Logo -->
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    <!-- SIDEBAR -->
     <div class="sidebar">
-        <!-- titre + logo de la sidebar -->
         <div class="logo-details">
-                <i class='bx bx-menu' id="btn" ></i>
+            <i class='bx bx-menu' id="btn"></i>
         </div>
-        <!-- sidebar list -->
         <ul class="nav-list">
-        <li>
-            <i class='bx bx-search'></i>
-            <input type="text" placeholder="Search...">
-            <span class="tooltip">Search</span>
-        </li>
-
-        <li>
-            <a href="index.html">
-              <i class='bx bx-grid-alt'></i>
-              <span class="links_name">Home</span>
-            </a>
-             <span class="tooltip">Home</span>
-        </li>
-        <!-- profil des users -->
-        <li>
-            <a href="register.html">
-            <i class='bx bx-user'></i>
-            <span class="links_name">Profil</span>
-        </a>
-        <span class="tooltip">Profil</span>
-        <!-- messages privés -->
-        </li>
-        <li>
-            <a href="#">
-            <i class='bx bx-chat'></i>
-            <span class="links_name">Messages</span>
-        </a>
-        <span class="tooltip">Messages</span>
-        </li>
-        <!-- paramètre -->
-        <li>
-            <a href="settings.html">
-            <i class='bx bx-cog'></i>
-            <span class="links_name">Settings</span>
-        </a>
-        <span class="tooltip">Settings</span>
-        </li>
-        <!-- profil -->
-        <li class="profile">
-            <div class="profile-details">
-                <img src="profile.jpg" alt="Profile" class="profile">
-                <div class="name_job">
-                    <div class="sidebar-name fullname"><%= adminUsername %></div>
+            <li>
+                <a href="home.html">
+                    <i class='bx bx-grid-alt'></i>
+                    <span class="links_name">Home</span>
+                </a>
+                <span class="tooltip">Home</span>
+            </li>
+            <li>
+                <a href="profil.html">
+                    <i class='bx bx-user'></i>
+                    <span class="links_name">Profil</span>
+                </a>
+                <span class="tooltip">Profil</span>
+            </li>
+            <li>
+                <a href="index.html">
+                    <i class='bx bx-log-in'></i>
+                    <span class="links_name">Connexion</span>
+                </a>
+                <span class="tooltip">Connexion</span>
+            </li>
+            <li class="profile">
+                <div class="profile-details">
+                    <img src="default-profile.png" alt="Profile" class="profile" id="profileImage">
+                    <div class="name_job">
+                        <div class="sidebar-name username" id="username-sidebar"></div>
+                    </div>
                 </div>
-            </div>
-            <!-- déconnexion compte -->
-            <i class='bx bx-log-out' id="log_out"></i>
-        </li>
+            </li>
         </ul>
     </div>
-<!-- TITRE -->
-<section class="home-section">
-    <div class="text">Social Working Club</div>
-
-    <div class="profile-container">
-        <div class="profile-header">
-            <div class="profile-img-container">
-                <img src="default-profile.png" alt="Profile" class="profile-image">
-              </div>
-            <div class="username-container">
-                <div class="name fullname"><%= adminUsername %></div>
+    <section class="home-section">
+        <div class="text">Social Working Club</div>
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-img-container">
+                    <img src="default-profile.png" alt="Profile" class="profile-image" id="profilePageProfileImage">
+                    <i class='bx bx-edit edit-icon' id="editProfileImage"></i>
+                </div>
+                <div class="username-container">
+                    <div class="username" id="profileUsername"></div>
+                </div>
             </div>
-            <div class="profile-bio-container">
-                <p class="bio">This is the user's bio...</p>
-            </div>            
-          </div>       
-    </div>
+            <button id="logoutButton">Logout</button>
+        </div>
+
+        <!-- Modal for profile image upload -->
+        <div id="profileImageModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <form id="updateProfileImageForm" enctype="multipart/form-data">
+                    <label for="profileImageInput">Choisissez une nouvelle image de profil:</label>
+                    <input type="file" id="profileImageInput" name="profileImage" accept="image/*">
+                    <button type="submit">Save Profile Image</button>
+                </form>
+            </div>
+        </div>
+    </section>
 
     <style>
         .profile-container {
@@ -94,99 +80,69 @@
             padding: 20px;
             text-align: center;
         }
-
-        .profile-settings {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-        }
-        
         .profile-header {
             position: relative;
         }
-        
         .profile-image {
-            padding: 40px;
             background-color: lightslategray;
             border-radius: 100%;
-            margin-bottom: 30px;
-        }
-
-        .name {
-            background-color: lightslategray;
-            border-radius: 30px;
-            padding: 10px;
-            margin: 30px;
-        }
-
-        .bio {
-            background-color: lightslategray;
-            border-radius: 30px;
-            padding: 20px;
-            margin: 30px;
-        }
-        
-        .username {
-            margin: 0;
-        }
-        
-        .settings-btn {
-            position: absolute;
-            left: 250px;
-            bottom: 50px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 24px;
-        }
-        
-        .profile-bio {
-            background-color: #f0f0f0;
-            padding: 15px;
-            margin-top: 15px;
-        }
-               
-        /* Mobile responsiveness */
-        @media screen and (max-width: 768px) {
-            .profile-container, .settings-modal {
-                width: 90%;
-            }
-        }
-
-        /* Style for form within dropdown */
-        #settings-form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        #settings-form label,
-        #settings-form input,
-        #settings-form textarea {
             margin-bottom: 10px;
+            cursor: pointer;
+            height: 230px;
         }
-
-        #settings-form button {
-            align-self: flex-end;
+        .edit-icon {
+            position: absolute;
+            top: 75%;
+            left: 65%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 
     <script defer>
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar logic
             let sidebar = document.querySelector(".sidebar");
             let closeBtn = document.querySelector("#btn");
-            let searchBtn = document.querySelector(".bx-search");
-        
+    
             closeBtn.addEventListener("click", () => {
                 sidebar.classList.toggle("open");
                 menuBtnChange();
             });
-        
-            searchBtn.addEventListener("click", () => {
-                sidebar.classList.toggle("open");
-                menuBtnChange();
-            });
-        
+    
             function menuBtnChange() {
                 if (sidebar.classList.contains("open")) {
                     closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
@@ -194,64 +150,109 @@
                     closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
                 }
             }
-
-        function handleResponse(response) {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
+    
+            const token = localStorage.getItem('token');
+    
+            if (token) {
+                fetch('/user/me', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user data');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.username) {
+                        document.getElementById('username-sidebar').textContent = data.username;
+                        document.getElementById('profileUsername').textContent = data.username;
+                        if (data.profileImage) {
+                            document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
+                            document.getElementById('profilePageProfileImage').src = `/uploads/${data.profileImage}`;
+                        }
+                    } else {
+                        window.location.href = '/login.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                    window.location.href = '/login.html';
+                });
+            } else {
+                window.location.href = '/login.html';
             }
-            return response.json(); // Nous supposons ici que le serveur renvoie du JSON
-        }
         
-        function handleError(error) {
-            console.error('Fetch error: ', error);
-            alert('Une erreur s’est produite: ' + error.message);
-        }
-        
-        // Form submission
-        var settingsForm = document.getElementById('settings-form');
-        if (settingsForm) {
-            settingsForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = '/login.html';
             });
-        }
-
-        function enableUsernameEdit() {
-            let usernameElement = document.querySelector('.username');
-            let usernameInput = document.createElement('input');
-            usernameInput.type = 'text';
-            usernameInput.className = 'username-input';
-            usernameInput.value = usernameElement.textContent;
-            usernameElement.parentNode.replaceChild(usernameInput, usernameElement);
         
-            let saveButton = document.createElement('button');
-            saveButton.textContent = 'Save';
-            saveButton.className = 'save-button'; // Assurez-vous que cette classe correspond au CSS que nous avons ajouté
-            saveButton.onclick = () => saveUsername(usernameInput.value);
+            // Modal logic
+            const modal = document.getElementById("profileImageModal");
+            const editProfileImage = document.getElementById("editProfileImage");
+            const span = document.getElementsByClassName("close")[0];
         
-            usernameInput.parentNode.insertBefore(saveButton, usernameInput.nextSibling);
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            const response = await fetch('/config');
-            const config = await response.json();
-            document.querySelectorAll('.fullname').forEach(el => el.textContent = config.adminUsername);
-        } catch (error) {
-            console.error('Erreur lors de la récupération de la configuration:', error);
-        }
-    });       
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const loggedIn = sessionStorage.getItem('loggedIn'); // suppose que l'état de connexion est stocké ici
-        const profileLink = document.querySelector('.nav-list .profile a');
-        if (loggedIn) {
-            profileLink.href = '/profile.html'; // Change le lien vers le profil de l'utilisateur
-        } else {
-            profileLink.href = '/login.html'; // Garde le lien vers la page de connexion
-        }
-    });    
-       
+            editProfileImage.onclick = function() {
+                modal.style.display = "block";
+            }
+        
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+        
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        
+            document.getElementById('updateProfileImageForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const profileImage = document.getElementById('profileImageInput').files[0];
+        
+                const formData = new FormData();
+                if (profileImage) {
+                    formData.append('profileImage', profileImage);
+                }
+        
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Vous devez être connecté pour mettre à jour le profil');
+                    return;
+                }
+        
+                try {
+                    const response = await fetch('/user/update-profile', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+        
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.profileImage) {
+                            document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
+                        }
+                        modal.style.display = "none";
+                        alert('Image de profil mise à jour avec succès');
+                    } else {
+                        const errorData = await response.json();
+                        alert(errorData.error || 'Erreur lors de la mise à jour de l\'image de profil');
+                    }
+                } catch (error) {
+                    console.error('Erreur réseau lors de la mise à jour de l\'image de profil:', error);
+                    alert('Erreur réseau lors de la mise à jour de l\'image de profil');
+                }
+            });
+        });
     </script>
 </body>
 </html>

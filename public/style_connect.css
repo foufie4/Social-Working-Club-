@@ -5,7 +5,7 @@
         box-sizing: border-box;
         font-family: "Poppins" , sans-serif;
     }
-
+    
     /* sidebar */
     .sidebar{
         position: fixed;
@@ -250,9 +250,14 @@
     
     .form-container {
         display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        grid-gap: 2rem;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: stretch;
+        background-color: #ffffff;
+        padding: 90px;
+        vertical-align: inherit;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        height: 800px;
     }
     
     form {
@@ -261,10 +266,10 @@
         justify-content: space-between;
         align-items: stretch;
         background-color: #ffffff;
-        padding: 4rem;
+        padding: 90px;
         vertical-align: inherit;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        height: 600px;
+        height: 800px;
     }
     
     #login-form {
@@ -282,6 +287,7 @@
     }
     
     input[type="text"],
+    input[type="email"],
     input[type="username"],
     input[type="email"],
     input[type="password"] {
@@ -295,6 +301,7 @@
     }
     
     input[type="text"]:focus,
+    input[type="email"]:focus,
     input[type="username"]:focus,
     input[type="email"]:focus,
     input[type="password"]:focus {

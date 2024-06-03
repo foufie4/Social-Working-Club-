@@ -1,12 +1,12 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const user = require('../models/user');
 
 // CREATE CONTEXT MIDDLEWARE
 const createContext = (req, res, next) => {
   req.context = {
     models: {
-      User,
+      user,
     },
   };
   next();

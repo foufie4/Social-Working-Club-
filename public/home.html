@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Social Working Club</title>
+  <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo-details">
+      <i class='bx bx-menu' id="btn"></i>
+    </div>
+    <ul class="nav-list">
+      <li>
+        <a href="home.html">
+          <i class='bx bx-grid-alt'></i>
+          <span class="links_name">Home</span>
+        </a>
+        <span class="tooltip">Home</span>
+      </li>
+      <li>
+        <a href="profil.html">
+          <i class='bx bx-user'></i>
+          <span class="links_name">Profil</span>
+        </a>
+        <span class="tooltip">Profil</span>
+      </li>
+      <li>
+        <a href="index.html">
+            <i class='bx bx-log-in'></i>
+            <span class="links_name">Connexion</span>
+        </a>
+        <span class="tooltip">Connexion</span>
+      </li>
+      <li class="profile">
+        <div class="profile-details">
+            <img src="profile.jpg" alt="Profile" class="profile">
+            <div class="name_job">
+                <div class="sidebar-name username" id="username-sidebar"></div>
+            </div>
+        </div>
+    </li>
+    </ul>
+  </div>
+  <section class="home-section">
+    <div class="text">Social Working Club</div>
+    <div class="create-post">
+      <form id="createPostForm">
+        <div class="input-group">
+          <textarea id="postContent" name="content" placeholder="Ecrivez quelque chose..." rows="2"></textarea>
+        </div>
+        <div class="file-upload-btns">
+          <input type="file" id="postImage" accept="image/*" class="file-upload-input">
+          <button type="submit" class="submit-post">Publier</button>
+        </div>
+      </form>
+    </div>
+    <div class="posts" id="postsContainer"></div>
+  </section>
+
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+        let sidebar = document.querySelector(".sidebar");
+        let closeBtn = document.querySelector("#btn");
+    
+        closeBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            menuBtnChange();
+        });
+    
+        function menuBtnChange() {
+            if (sidebar.classList.contains("open")) {
+                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
+            } else {
+                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
+            }
+        }
+    
+        const token = localStorage.getItem('token');
+    
+        if (token) {
+            fetch('/user/me', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.username) {
+                    const usernameSidebar = document.getElementById('username-sidebar');
+                    if (usernameSidebar) {
+                        usernameSidebar.textContent = data.username;
+                    }
+    
+                    // Récupérer les posts
+                    fetch('/posts', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(posts => {
+                        const postsContainer = document.getElementById('postsContainer');
+                        if (postsContainer) {
+                            postsContainer.innerHTML = ''; // Clear any existing posts
+                            posts.forEach(post => {
+                                const postElement = document.createElement('div');
+                                postElement.classList.add('post');
+                                postElement.innerHTML = `
+                                    <div class="post-user">${post.user.username}</div>
+                                    <div class="post-content">${post.content}</div>
+                                    <div class="post-actions">
+                                        <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
+                                        <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
+                                    </div>
+                                    <div class="comments" style="display: none;">
+                                        <div class="comment-list">
+                                            ${post.comments.map(comment => `
+                                                <div class="comment">
+                                                    <span class="comment-user">${comment.user.username}</span>
+                                                    <span class="comment-content">${comment.content}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        <div class="add-comment">
+                                            <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+                                            <button class="submit-comment" data-id="${post._id}">Commenter</button>
+                                        </div>
+                                    </div>
+                                `;
+                                if (post.image) {
+                                    const postImage = document.createElement('img');
+                                    postImage.src = `/uploads/${post.image}`;
+                                    postImage.classList.add('post-image');
+                                    postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
+                                }
+                                postsContainer.appendChild(postElement);
+                            });
+  
+                            // Ajouter les événements pour les likes et les commentaires
+                            document.querySelectorAll('.like').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const postId = this.getAttribute('data-id');
+                                    fetch(`/posts/${postId}/like`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${token}`
+                                        }
+                                    })
+                                    .then(response => response.json())
+                                    .then(updatedPost => {
+                                        this.innerHTML = `<i class='bx bx-like'></i> Like (${updatedPost.likes.length})`;
+                                    })
+                                    .catch(error => console.error('Error liking post:', error));
+                                });
+                            });
+  
+                            document.querySelectorAll('.comment').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const commentsSection = this.closest('.post').querySelector('.comments');
+                                    commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+                                });
+                            });
+  
+                            document.querySelectorAll('.submit-comment').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const postId = this.getAttribute('data-id');
+                                    const commentInput = this.closest('.comments').querySelector('.comment-input');
+                                    const commentContent = commentInput.value.trim();
+                                    if (commentContent) {
+                                        fetch(`/posts/${postId}/comment`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${token}`
+                                            },
+                                            body: JSON.stringify({ content: commentContent })
+                                        })
+                                        .then(response => {
+                                            if (!response.ok) {
+                                                throw new Error('Failed to comment on post');
+                                            }
+                                            return response.json();
+                                        })
+                                        .then(updatedPost => {
+                                            const commentsList = this.closest('.comments').querySelector('.comment-list');
+                                            const newComment = document.createElement('div');
+                                            newComment.classList.add('comment');
+                                            const lastComment = updatedPost.comments[updatedPost.comments.length - 1];
+                                            newComment.innerHTML = `
+                                                <span class="comment-user">${lastComment.user.username}</span>
+                                                <span class="comment-content">${lastComment.content}</span>
+                                            `;
+                                            commentsList.appendChild(newComment);
+                                            commentInput.value = '';
+                                        })
+                                        .catch(error => console.error('Error commenting on post:', error));
+                                    }
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching posts:', error));
+    
+                } else {
+                    window.location.href = '/login.html';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+                window.location.href = '/login.html';
+            });
+        } else {
+            window.location.href = '/login.html';
+        }
+    
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = '/login.html';
+            });
+        }
+    
+        // Modal logic
+        const modal = document.getElementById("profileImageModal");
+        const editProfileImage = document.getElementById("editProfileImage");
+        const span = document.getElementsByClassName("close")[0];
+    
+        if (editProfileImage) {
+            editProfileImage.onclick = function() {
+                modal.style.display = "block";
+            }
+        }
+  
+        if (span) {
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+        }
+  
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    
+        const updateProfileImageForm = document.getElementById('updateProfileImageForm');
+        if (updateProfileImageForm) {
+            updateProfileImageForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const profileImageInput = document.getElementById('profileImageInput');
+                const profileImage = profileImageInput ? profileImageInput.files[0] : null;
+        
+                const formData = new FormData();
+                if (profileImage) {
+                    formData.append('profileImage', profileImage);
+                }
+        
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Vous devez être connecté pour mettre à jour le profil');
+                    return;
+                }
+        
+                try {
+                    const response = await fetch('/user/update-profile', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+        
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.profileImage) {
+                            const profileImage = document.getElementById('profileImage');
+                            if (profileImage) {
+                                profileImage.src = `/uploads/${data.profileImage}`;
+                            }
+                        }
+                        modal.style.display = "none";
+                        alert('Image de profil mise à jour avec succès');
+                    } else {
+                        const errorData = await response.json();
+                        alert(errorData.error || 'Erreur lors de la mise à jour de l\'image de profil');
+                    }
+                } catch (error) {
+                    console.error('Erreur réseau lors de la mise à jour de l\'image de profil:', error);
+                    alert('Erreur réseau lors de la mise à jour de l\'image de profil');
+                }
+            });
+        }
+  
+        console.log(document.getElementById('username-sidebar'));
+        console.log(document.getElementById('profileUsername'));
+        console.log(document.getElementById('profileImage'));
+        console.log(document.getElementById('profilePageProfileImage'));
+        console.log(document.getElementById('logoutButton'));
+        console.log(document.getElementById('updateProfileImageForm'));
+        console.log(document.getElementById('profileImageInput'));
+    });
+    </script>
+</body>
+</html>

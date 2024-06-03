@@ -1,95 +1,71 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style_connect.css">
-    <title>Social Working Club</title>
-    <!-- Logo -->
-    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-   </head>
-    <body>
-        <!-- SIDEBAR -->
-        <div class="sidebar">
-            <!-- titre + logo de la sidebar -->
-            <div class="logo-details">
-                    <i class='bx bx-menu' id="btn" ></i>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Social Working Club</title>
+  <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo-details">
+      <i class='bx bx-menu' id="btn"></i>
+    </div>
+    <ul class="nav-list">
+      <li>
+        <a href="home.html">
+          <i class='bx bx-grid-alt'></i>
+          <span class="links_name">Home</span>
+        </a>
+        <span class="tooltip">Home</span>
+      </li>
+      <li>
+        <a href="profil.html">
+          <i class='bx bx-user'></i>
+          <span class="links_name">Profil</span>
+        </a>
+        <span class="tooltip">Profil</span>
+      </li>
+      <li>
+        <a href="index.html">
+            <i class='bx bx-log-in'></i>
+            <span class="links_name">Connexion</span>
+        </a>
+        <span class="tooltip">Connexion</span>
+      </li>
+      <li class="profile">
+        <div class="profile-details">
+            <img src="profile.jpg" alt="Profile" class="profile">
+            <div class="name_job">
+                <div class="sidebar-name username" id="username-sidebar"></div>
             </div>
-            <!-- sidebar list -->
-            <ul class="nav-list">
-            <li>
-                <i class='bx bx-search'></i>
-                <input type="text" placeholder="Search...">
-                <span class="tooltip">Search</span>
-            </li>
-
-            <li>
-                <a href="index.html">
-                  <i class='bx bx-grid-alt'></i>
-                  <span class="links_name">Home</span>
-                </a>
-                 <span class="tooltip">Home</span>
-            </li>
-            <!-- profil des users -->
-            <li>
-                <a href="connexion.html">
-                <i class='bx bx-user'></i>
-                <span class="links_name">Profil</span>
-            </a>
-            <span class="tooltip">Profil</span>
-            <!-- messages privés -->
-            </li>
-            <li>
-                <a href="#">
-                <i class='bx bx-chat'></i>
-                <span class="links_name">Messages</span>
-            </a>
-            <span class="tooltip">Messages</span>
-            </li>
-            <!-- paramètre -->
-            <li>
-                <a href="settings.html">
-                <i class='bx bx-cog'></i>
-                <span class="links_name">Settings</span>
-            </a>
-            <span class="tooltip">Settings</span>
-            </li>
-            <!-- profil -->
-            <li class="profile">
-                <div class="profile-details">
-                    <img src="profile.jpg" alt="profileImg">
-                    <div class="name_job">
-                        <div class="sidebar-name fullname">pseudo</div>
-                    </div>
-                </div>
-                <!-- déconnexion compte -->
-                <i class='bx bx-log-out' id="log_out"></i>
-            </li>
-            </ul>
         </div>
-    <!-- TITRE -->
-    <section class="home-section">
-        <div class="text">Social Working Club</div>
-        <div class="form-container">
-            <form id="login-form" action="/user/login" method="post">
-                <h2>Connexion</h2>
-                <div class="input-container">
-                    <input type="text" id="username" name="username" placeholder="Username" required>
-                </div>
-                <div class="input-container">
-                    <input type="password" id="password" name="password" placeholder="Password" required>
-                </div>
-                <button type="submit">Se connecter</button>
-                <p>Pas encore de compte ? <a href="register.html">Créez-en un ici.</a></p>
-            </form>
-            <p id="error-message"></p>
+    </li>
+    </ul>
+  </div>
+  <section class="home-section">
+    <div class="text">Social Working Club</div>
+    <div class="form-container">
+      <form id="login-form" action="/auth/login" method="post">
+        <h2>Connexion</h2>
+        <div class="input-container">
+          <input type="email" id="email" name="email" required>
+          <label for="email">E-mail</label>
         </div>
-</section>
-
-<script defer>
+        <div class="input-container">
+          <input type="password" id="password" name="password" required>
+          <label for="password">Mot de passe</label>
+        </div>
+        <button type="submit" id="loginButton">Se connecter</button>
+        <p>Pas encore de compte ? <a href="index.html">Créez-en un ici.</a></p>
+        <div id="error-message" style="color: red;"></div>
+      </form>
+    </div>
+  </section>
+  <script defer>
     let sidebar = document.querySelector(".sidebar");
     let closeBtn = document.querySelector("#btn");
-    let searchBtn = document.querySelector(".bx-search");
 
 function menuBtnChange() {
     if (sidebar.classList.contains("open")) {
@@ -99,38 +75,49 @@ function menuBtnChange() {
     }
 }
 
-closeBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    menuBtnChange(); //calling the function
-});
+    closeBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      menuBtnChange();
+    });
 
-searchBtn.addEventListener("click", () => { // Sidebar open when you click on the search icon
-    sidebar.classList.toggle("open");
-    menuBtnChange(); //calling the function
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      
-      const response = await fetch("/user/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
-      });
-      
-      const data = await response.json();
-      if (data.error) {
-        alert(data.error);
+    function menuBtnChange() {
+      if (sidebar.classList.contains("open")) {
+        closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
       } else {
-        window.location.href = "/profil";
+        closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
+      }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      console.log(`Attempting to login with email: ${email} and password: ${password}`);
+
+      try {
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          console.log('Login successful!');
+          console.log('Token:', data.token);
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('username', data.username);
+          window.location.href = '/profil.html';
+      } else {
+          console.log('Login failed:', data.error);
+          document.getElementById('error-message').innerText = `Login failed: ${data.error}`;
+      }
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('error-message').innerText = 'An error occurred. Please try again later.';
       }
     });
-  });
-</script>
+  </script>
 </body>
 </html>
