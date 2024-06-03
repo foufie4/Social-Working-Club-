@@ -366,7 +366,8 @@ a {
 
 .file-upload-btns {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    flex-direction: column;
 }
 
 .create-post .file-upload-label {
@@ -391,6 +392,7 @@ a {
     cursor: pointer;
     white-space: nowrap;
     font-size: 15px;
+    margin: 15px;
 }
 
 .create-post .submit-post:hover {
@@ -418,22 +420,96 @@ a {
     flex-direction: column;
     background-color: #f9f9f9;
     padding: 10px;
+    margin-bottom: 10px;
     border-radius: 4px;
     align-items: flex-start;
 }
 
-.post-actions img {
-    padding: 5px 10px;
-    margin-right: 5px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.post-user {
+    font-weight: bold;
 }
 
-.like, .comment, .share {
-    color: white;
-    height: 20px;
+.post-content {
+    margin-top: 5px;
+}
+
+.post-image {
+    margin-top: 10px;
+    max-width: 100%;
+}
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.like, .comment {
     cursor: pointer;
+    color: #4267b2;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.like i, .comment i {
+    margin-right: 5px;
+}
+
+.comment {
+    margin-left: 20px;
+}
+
+.comments {
+    margin-top: 10px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.comment-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.add-comment {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    flex-direction: column;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.submit-comment {
+    background-color: #4267b2;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.submit-comment:hover {
+    background-color: #365899;
+}
+
+.comment-user {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.comment-content {
+    display: inline-block;
+}
+
+.comment {
+    margin-bottom: 5px;
 }
 
 .post-actions hover {
