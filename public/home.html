@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="style.css">
   <title>Social Working Club</title>
   <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+  <script src="https://cdn.jsdelivr.net/npm/he/he.js"></script> <!-- Add this line to include the he library -->
 </head>
 <body>
   <div class="sidebar">
@@ -36,7 +37,7 @@
       </li>
       <li class="profile">
         <div class="profile-details">
-            <img src="profile.jpg" alt="Profile" class="profile">
+            <img src="default-profile.png" alt="Profile" class="profile" id="profileImage">
             <div class="name_job">
                 <div class="sidebar-name username" id="username-sidebar"></div>
             </div>
@@ -60,179 +61,182 @@
     <div class="posts" id="postsContainer"></div>
   </section>
 
+  
+  <script src="https://cdn.jsdelivr.net/npm/he/he.min.js"></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', function() {
         let sidebar = document.querySelector(".sidebar");
         let closeBtn = document.querySelector("#btn");
-    
+      
         closeBtn.addEventListener("click", () => {
-            sidebar.classList.toggle("open");
-            menuBtnChange();
+          sidebar.classList.toggle("open");
+          menuBtnChange();
         });
-    
+      
         function menuBtnChange() {
-            if (sidebar.classList.contains("open")) {
-                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-            } else {
-                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
-            }
+          if (sidebar.classList.contains("open")) {
+            closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
+          } else {
+            closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
+          }
         }
-    
+      
         const token = localStorage.getItem('token');
-    
+      
         if (token) {
-            fetch('/user/me', {
+          fetch('/user/me', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch user data');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.username) {
+              document.getElementById('username-sidebar').textContent = he.encode(data.username);
+      
+              // Fetch posts
+              fetch('/posts', {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
                 }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user data');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.username) {
-                    const usernameSidebar = document.getElementById('username-sidebar');
-                    if (usernameSidebar) {
-                        usernameSidebar.textContent = data.username;
+              })
+              .then(response => response.json())
+              .then(posts => {
+                const postsContainer = document.getElementById('postsContainer');
+                if (postsContainer) {
+                  postsContainer.innerHTML = ''; // Clear any existing posts
+                  posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.classList.add('post');
+                    postElement.innerHTML = `
+                      <div class="post-user">
+                        <img src="/uploads/${post.user.profileImage}" alt="${post.user.username}" class="post-user-image">
+                        ${post.user.username}
+                      </div>
+                      <div class="post-content">${he.decode(post.content)}</div>
+                      <div class="post-actions">
+                        <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
+                        <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
+                      </div>
+                      <div class="comments" style="display: none;">
+                        <div class="comment-list">
+                          ${post.comments.map(comment => `
+                            <div class="comment">
+                              <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
+                              <span class="comment-user">${comment.user.username}</span>
+                              <span class="comment-content">${he.decode(comment.content)}</span>
+                            </div>
+                          `).join('')}
+                        </div>
+                        <div class="add-comment">
+                          <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+                          <button class="submit-comment" data-id="${post._id}">Commenter</button>
+                        </div>
+                      </div>
+                    `;
+                    if (post.image) {
+                      const postImage = document.createElement('img');
+                      postImage.src = `/uploads/${he.encode(post.image)}`;
+                      postImage.classList.add('post-image');
+                      postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
                     }
-    
-                    // Récupérer les posts
-                    fetch('/posts', {
-                        method: 'GET',
+                    postsContainer.appendChild(postElement);
+                  });
+      
+                  // Add event listeners for likes and comments
+                  document.querySelectorAll('.like').forEach(button => {
+                    button.addEventListener('click', function() {
+                      const postId = this.getAttribute('data-id');
+                      fetch(`/posts/${postId}/like`, {
+                        method: 'POST',
                         headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${token}`
+                        }
+                      })
+                      .then(response => response.json())
+                      .then(updatedPost => {
+                        this.innerHTML = `<i class='bx bx-like'></i> Like (${updatedPost.likes.length})`;
+                      })
+                      .catch(error => console.error('Error liking post:', error));
+                    });
+                  });
+      
+                  document.querySelectorAll('.comment').forEach(button => {
+                    button.addEventListener('click', function() {
+                      const commentsSection = this.closest('.post').querySelector('.comments');
+                      commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+                    });
+                  });
+      
+                  document.querySelectorAll('.submit-comment').forEach(button => {
+                    button.addEventListener('click', function() {
+                      const postId = this.getAttribute('data-id');
+                      const commentInput = this.closest('.comments').querySelector('.comment-input');
+                      const commentContent = commentInput.value.trim();
+                      if (commentContent) {
+                        fetch(`/posts/${postId}/comment`, {
+                          method: 'POST',
+                          headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(posts => {
-                        const postsContainer = document.getElementById('postsContainer');
-                        if (postsContainer) {
-                            postsContainer.innerHTML = ''; // Clear any existing posts
-                            posts.forEach(post => {
-                                const postElement = document.createElement('div');
-                                postElement.classList.add('post');
-                                postElement.innerHTML = `
-                                    <div class="post-user">${post.user.username}</div>
-                                    <div class="post-content">${post.content}</div>
-                                    <div class="post-actions">
-                                        <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
-                                        <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
-                                    </div>
-                                    <div class="comments" style="display: none;">
-                                        <div class="comment-list">
-                                            ${post.comments.map(comment => `
-                                                <div class="comment">
-                                                    <span class="comment-user">${comment.user.username}</span>
-                                                    <span class="comment-content">${comment.content}</span>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                        <div class="add-comment">
-                                            <textarea class="comment-input" placeholder="Add a comment..."></textarea>
-                                            <button class="submit-comment" data-id="${post._id}">Commenter</button>
-                                        </div>
-                                    </div>
-                                `;
-                                if (post.image) {
-                                    const postImage = document.createElement('img');
-                                    postImage.src = `/uploads/${post.image}`;
-                                    postImage.classList.add('post-image');
-                                    postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
-                                }
-                                postsContainer.appendChild(postElement);
-                            });
-  
-                            // Ajouter les événements pour les likes et les commentaires
-                            document.querySelectorAll('.like').forEach(button => {
-                                button.addEventListener('click', function() {
-                                    const postId = this.getAttribute('data-id');
-                                    fetch(`/posts/${postId}/like`, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${token}`
-                                        }
-                                    })
-                                    .then(response => response.json())
-                                    .then(updatedPost => {
-                                        this.innerHTML = `<i class='bx bx-like'></i> Like (${updatedPost.likes.length})`;
-                                    })
-                                    .catch(error => console.error('Error liking post:', error));
-                                });
-                            });
-  
-                            document.querySelectorAll('.comment').forEach(button => {
-                                button.addEventListener('click', function() {
-                                    const commentsSection = this.closest('.post').querySelector('.comments');
-                                    commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
-                                });
-                            });
-  
-                            document.querySelectorAll('.submit-comment').forEach(button => {
-                                button.addEventListener('click', function() {
-                                    const postId = this.getAttribute('data-id');
-                                    const commentInput = this.closest('.comments').querySelector('.comment-input');
-                                    const commentContent = commentInput.value.trim();
-                                    if (commentContent) {
-                                        fetch(`/posts/${postId}/comment`, {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'Authorization': `Bearer ${token}`
-                                            },
-                                            body: JSON.stringify({ content: commentContent })
-                                        })
-                                        .then(response => {
-                                            if (!response.ok) {
-                                                throw new Error('Failed to comment on post');
-                                            }
-                                            return response.json();
-                                        })
-                                        .then(updatedPost => {
-                                            const commentsList = this.closest('.comments').querySelector('.comment-list');
-                                            const newComment = document.createElement('div');
-                                            newComment.classList.add('comment');
-                                            const lastComment = updatedPost.comments[updatedPost.comments.length - 1];
-                                            newComment.innerHTML = `
-                                                <span class="comment-user">${lastComment.user.username}</span>
-                                                <span class="comment-content">${lastComment.content}</span>
-                                            `;
-                                            commentsList.appendChild(newComment);
-                                            commentInput.value = '';
-                                        })
-                                        .catch(error => console.error('Error commenting on post:', error));
-                                    }
-                                });
-                            });
-                        }
-                    })
-                    .catch(error => console.error('Error fetching posts:', error));
-    
-                } else {
-                    window.location.href = '/login.html';
+                          },
+                          body: JSON.stringify({ content: he.encode(commentContent) })
+                        })
+                        .then(response => {
+                          if (!response.ok) {
+                            throw new Error('Failed to comment on post');
+                          }
+                          return response.json();
+                        })
+                        .then(updatedPost => {
+                          const commentsList = this.closest('.comments').querySelector('.comment-list');
+                          const newComment = document.createElement('div');
+                          newComment.classList.add('comment');
+                          const lastComment = updatedPost.comments[updatedPost.comments.length - 1];
+                          newComment.innerHTML = `
+                            <img src="/uploads/${he.encode(lastComment.user.profileImage)}" alt="${he.encode(lastComment.user.username)}" class="comment-user-image">
+                            <span class="comment-user">${he.encode(lastComment.user.username)}</span>
+                            <span class="comment-content">${he.encode(lastComment.content)}</span>
+                          `;
+                          commentsList.appendChild(newComment);
+                          commentInput.value = '';
+                        })
+                        .catch(error => console.error('Error commenting on post:', error));
+                      }
+                    });
+                  });
                 }
-            })
-            .catch(error => {
-                console.error('Error fetching user data:', error);
-                window.location.href = '/login.html';
-            });
-        } else {
+              })
+              .catch(error => console.error('Error fetching posts:', error));
+            } else {
+              window.location.href = '/login.html';
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching user data:', error);
             window.location.href = '/login.html';
+          });
+        } else {
+          window.location.href = '/login.html';
         }
-    
+      
         const logoutButton = document.getElementById('logoutButton');
         if (logoutButton) {
-            logoutButton.addEventListener('click', function() {
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                window.location.href = '/login.html';
-            });
+          logoutButton.addEventListener('click', function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = '/login.html';
+          });
         }
     
         // Modal logic

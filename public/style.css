@@ -383,6 +383,10 @@ a {
     display: none;
 }
 
+.file-upload-input {
+    margin: 15px;
+}
+
 .create-post .submit-post {
     padding: 10px 50px;
     background-color: #4267b2;
@@ -419,14 +423,17 @@ a {
     display: flex;
     flex-direction: column;
     background-color: #f9f9f9;
-    padding: 10px;
+    padding: 20px;
     margin-bottom: 10px;
     border-radius: 4px;
     align-items: flex-start;
+    width: 375px;
 }
 
 .post-user {
     font-weight: bold;
+    display: flex;
+    align-items: center;
 }
 
 .post-content {
@@ -493,6 +500,7 @@ a {
     padding: 5px 10px;
     cursor: pointer;
     border-radius: 4px;
+    margin: 10px;
 }
 
 .submit-comment:hover {
@@ -502,6 +510,13 @@ a {
 .comment-user {
     font-weight: bold;
     margin-right: 5px;
+}
+
+.comment-user-image {
+    height: 40px;
+    width: 40px;
+    border-radius: 30px;
+    margin: 5px;
 }
 
 .comment-content {
@@ -519,4 +534,11 @@ a {
 .username {
     height: 50px;
     font-size: 20px;
+}
+
+.post-user-image {
+    height: 60px;
+    width: 60px;
+    border-radius: 30px;
+    margin: 10px;
 }

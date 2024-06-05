@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const helmet = require('helmet');
+const xss = require('xss-clean');
 
 const UserRouter = require('./routes/userRoutes');
 const PostRouter = require('./routes/postRoutes');
@@ -15,7 +17,9 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const { MONGO_URI, PORT = 5000 } = process.env;
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI, {
+  serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
+})
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
@@ -25,6 +29,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+app.use(helmet());
+app.use(xss());
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {

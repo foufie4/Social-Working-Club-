@@ -1,3 +1,4 @@
+const he = require('he');
 const Post = require('../models/post');
 
 exports.createPost = async (req, res) => {
@@ -11,11 +12,11 @@ exports.createPost = async (req, res) => {
   try {
     const newPost = new Post({
       user: req.user.id,
-      content,
+      content: he.encode(content), // Échappement du contenu
       image
     });
     await newPost.save();
-    await newPost.populate('user', 'username').execPopulate();
+    await newPost.populate('user', 'username profileImage').execPopulate();
     res.status(201).json(newPost);
   } catch (error) {
     console.error('Error creating post:', error);
@@ -25,8 +26,29 @@ exports.createPost = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 }).populate('user', 'username').populate('comments.user', 'username');
-    res.status(200).json(posts);
+    const posts = await Post.find().sort({ createdAt: -1 }).populate('user', 'username profileImage').populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        select: 'username profileImage'
+      }
+    });
+    res.status(200).json(posts.map(post => ({
+      ...post.toObject(),
+      content: he.encode(post.content),
+      user: {
+        ...post.user.toObject(),
+        username: he.encode(post.user.username)
+      },
+      comments: post.comments.map(comment => ({
+        ...comment.toObject(),
+        content: he.encode(comment.content),
+        user: {
+          ...comment.user.toObject(),
+          username: he.encode(comment.user.username)
+        }
+      }))
+    })));
   } catch (error) {
     console.error('Error fetching posts:', error);
     res.status(500).json({ error: 'Server error' });
@@ -63,12 +85,12 @@ exports.commentPost = async (req, res) => {
 
     const comment = {
       user: req.user.id,
-      content: req.body.content
+      content: he.encode(req.body.content)
     };
 
     post.comments.push(comment);
     await post.save();
-    await post.populate('comments.user', 'username');
+    await post.populate('comments.user', 'username profileImage').execPopulate();
     res.status(200).json(post);
   } catch (error) {
     console.error('Error commenting on post:', error);
