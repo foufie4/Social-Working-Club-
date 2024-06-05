@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="style.css">
   <title>Social Working Club</title>
   <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-  <script src="https://cdn.jsdelivr.net/npm/he/he.js"></script> <!-- Add this line to include the he library -->
+  <script src="https://cdn.jsdelivr.net/npm/he/he.js"></script>
 </head>
 <body>
   <div class="sidebar">
@@ -48,12 +48,12 @@
   <section class="home-section">
     <div class="text">Social Working Club</div>
     <div class="create-post">
-      <form id="createPostForm">
+      <form id="createPostForm" enctype="multipart/form-data">
         <div class="input-group">
           <textarea id="postContent" name="content" placeholder="Ecrivez quelque chose..." rows="2"></textarea>
         </div>
         <div class="file-upload-btns">
-          <input type="file" id="postImage" accept="image/*" class="file-upload-input">
+          <input type="file" id="postImage" name="image" accept="image/*" class="file-upload-input">
           <button type="submit" class="submit-post">Publier</button>
         </div>
       </form>
@@ -61,263 +61,404 @@
     <div class="posts" id="postsContainer"></div>
   </section>
 
-  
   <script src="https://cdn.jsdelivr.net/npm/he/he.min.js"></script>
   <script defer>
-    document.addEventListener('DOMContentLoaded', function() {
-        let sidebar = document.querySelector(".sidebar");
-        let closeBtn = document.querySelector("#btn");
-      
-        closeBtn.addEventListener("click", () => {
-          sidebar.classList.toggle("open");
-          menuBtnChange();
-        });
-      
-        function menuBtnChange() {
-          if (sidebar.classList.contains("open")) {
-            closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-          } else {
-            closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
-          }
+    document.addEventListener('DOMContentLoaded', function () {
+      let sidebar = document.querySelector('.sidebar');
+      let closeBtn = document.querySelector('#btn');
+  
+      closeBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        menuBtnChange();
+      });
+  
+      function menuBtnChange() {
+        if (sidebar.classList.contains('open')) {
+          closeBtn.classList.replace('bx-menu', 'bx-menu-alt-right');
+        } else {
+          closeBtn.classList.replace('bx-menu-alt-right', 'bx-menu');
         }
-      
-        const token = localStorage.getItem('token');
-      
-        if (token) {
-          fetch('/user/me', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          })
-          .then(response => {
+      }
+  
+      function updateSidebarProfileImage(imageUrl) {
+        const profileImageElement = document.getElementById('profileImage');
+        if (profileImageElement) {
+          profileImageElement.src = imageUrl;
+        }
+      }
+
+      const token = localStorage.getItem('token');
+      let currentUser;
+      if (token) {
+        fetch('/user/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => {
             if (!response.ok) {
               throw new Error('Failed to fetch user data');
             }
             return response.json();
           })
-          .then(data => {
-            if (data.username) {
-              document.getElementById('username-sidebar').textContent = he.encode(data.username);
-      
+          .then((userData) => {
+            currentUser = userData;
+            if (userData.username) {
+              document.getElementById('username-sidebar').textContent = he.encode(userData.username);
+              if (userData.profileImage) {
+                const profileImageUrl = `/uploads/${userData.profileImage}`;
+                updateSidebarProfileImage(profileImageUrl);
+              }
               // Fetch posts
               fetch('/posts', {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-                }
+                  Authorization: `Bearer ${token}`,
+                },
               })
-              .then(response => response.json())
-              .then(posts => {
-                const postsContainer = document.getElementById('postsContainer');
-                if (postsContainer) {
-                  postsContainer.innerHTML = ''; // Clear any existing posts
-                  posts.forEach(post => {
-                    const postElement = document.createElement('div');
-                    postElement.classList.add('post');
-                    postElement.innerHTML = `
-                      <div class="post-user">
-                        <img src="/uploads/${post.user.profileImage}" alt="${post.user.username}" class="post-user-image">
-                        ${post.user.username}
-                      </div>
-                      <div class="post-content">${he.decode(post.content)}</div>
-                      <div class="post-actions">
-                        <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
-                        <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
-                      </div>
-                      <div class="comments" style="display: none;">
-                        <div class="comment-list">
-                          ${post.comments.map(comment => `
-                            <div class="comment">
-                              <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
-                              <span class="comment-user">${comment.user.username}</span>
-                              <span class="comment-content">${he.decode(comment.content)}</span>
-                            </div>
-                          `).join('')}
-                        </div>
-                        <div class="add-comment">
-                          <textarea class="comment-input" placeholder="Add a comment..."></textarea>
-                          <button class="submit-comment" data-id="${post._id}">Commenter</button>
-                        </div>
-                      </div>
-                    `;
-                    if (post.image) {
-                      const postImage = document.createElement('img');
-                      postImage.src = `/uploads/${he.encode(post.image)}`;
-                      postImage.classList.add('post-image');
-                      postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
-                    }
-                    postsContainer.appendChild(postElement);
-                  });
-      
-                  // Add event listeners for likes and comments
-                  document.querySelectorAll('.like').forEach(button => {
-                    button.addEventListener('click', function() {
-                      const postId = this.getAttribute('data-id');
-                      fetch(`/posts/${postId}/like`, {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}`
-                        }
-                      })
-                      .then(response => response.json())
-                      .then(updatedPost => {
-                        this.innerHTML = `<i class='bx bx-like'></i> Like (${updatedPost.likes.length})`;
-                      })
-                      .catch(error => console.error('Error liking post:', error));
+                .then((response) => response.json())
+                .then((posts) => {
+                  const postsContainer = document.getElementById('postsContainer');
+                  if (postsContainer) {
+                    postsContainer.innerHTML = ''; // Clear any existing posts
+                    posts.forEach((post) => {
+                      const postElement = createPostElement(post, currentUser);
+                      postsContainer.appendChild(postElement);
                     });
-                  });
-      
-                  document.querySelectorAll('.comment').forEach(button => {
-                    button.addEventListener('click', function() {
-                      const commentsSection = this.closest('.post').querySelector('.comments');
-                      commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
-                    });
-                  });
-      
-                  document.querySelectorAll('.submit-comment').forEach(button => {
-                    button.addEventListener('click', function() {
-                      const postId = this.getAttribute('data-id');
-                      const commentInput = this.closest('.comments').querySelector('.comment-input');
-                      const commentContent = commentInput.value.trim();
-                      if (commentContent) {
-                        fetch(`/posts/${postId}/comment`, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                          },
-                          body: JSON.stringify({ content: he.encode(commentContent) })
-                        })
-                        .then(response => {
-                          if (!response.ok) {
-                            throw new Error('Failed to comment on post');
-                          }
-                          return response.json();
-                        })
-                        .then(updatedPost => {
-                          const commentsList = this.closest('.comments').querySelector('.comment-list');
-                          const newComment = document.createElement('div');
-                          newComment.classList.add('comment');
-                          const lastComment = updatedPost.comments[updatedPost.comments.length - 1];
-                          newComment.innerHTML = `
-                            <img src="/uploads/${he.encode(lastComment.user.profileImage)}" alt="${he.encode(lastComment.user.username)}" class="comment-user-image">
-                            <span class="comment-user">${he.encode(lastComment.user.username)}</span>
-                            <span class="comment-content">${he.encode(lastComment.content)}</span>
-                          `;
-                          commentsList.appendChild(newComment);
-                          commentInput.value = '';
-                        })
-                        .catch(error => console.error('Error commenting on post:', error));
-                      }
-                    });
-                  });
-                }
-              })
-              .catch(error => console.error('Error fetching posts:', error));
+                    attachEventListeners();
+                  }
+                })
+                .catch((error) => console.error('Error fetching posts:', error));
             } else {
               window.location.href = '/login.html';
             }
           })
-          .catch(error => {
+          .catch((error) => {
             console.error('Error fetching user data:', error);
             window.location.href = '/login.html';
           });
-        } else {
+      } else {
+        window.location.href = '/login.html';
+      }
+
+      const logoutButton = document.getElementById('logoutButton');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function () {
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
           window.location.href = '/login.html';
+        });
+      }
+
+      // Modal logic
+      const modal = document.getElementById('profileImageModal');
+      const editProfileImage = document.getElementById('editProfileImage');
+      const span = document.getElementsByClassName('close')[0];
+
+      if (editProfileImage) {
+        editProfileImage.onclick = function () {
+          modal.style.display = 'block';
+        };
+      }
+
+      if (span) {
+        span.onclick = function () {
+          modal.style.display = 'none';
+        };
+      }
+
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = 'none';
         }
-      
-        const logoutButton = document.getElementById('logoutButton');
-        if (logoutButton) {
-          logoutButton.addEventListener('click', function() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            window.location.href = '/login.html';
-          });
-        }
-    
-        // Modal logic
-        const modal = document.getElementById("profileImageModal");
-        const editProfileImage = document.getElementById("editProfileImage");
-        const span = document.getElementsByClassName("close")[0];
-    
-        if (editProfileImage) {
-            editProfileImage.onclick = function() {
-                modal.style.display = "block";
-            }
-        }
-  
-        if (span) {
-            span.onclick = function() {
-                modal.style.display = "none";
-            }
-        }
-  
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-    
-        const updateProfileImageForm = document.getElementById('updateProfileImageForm');
-        if (updateProfileImageForm) {
-            updateProfileImageForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const profileImageInput = document.getElementById('profileImageInput');
-                const profileImage = profileImageInput ? profileImageInput.files[0] : null;
-        
-                const formData = new FormData();
-                if (profileImage) {
-                    formData.append('profileImage', profileImage);
-                }
-        
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    alert('Vous devez être connecté pour mettre à jour le profil');
-                    return;
-                }
-        
-                try {
-                    const response = await fetch('/user/update-profile', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: formData
-                    });
-        
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.profileImage) {
-                            const profileImage = document.getElementById('profileImage');
-                            if (profileImage) {
-                                profileImage.src = `/uploads/${data.profileImage}`;
-                            }
-                        }
-                        modal.style.display = "none";
-                        alert('Image de profil mise à jour avec succès');
-                    } else {
-                        const errorData = await response.json();
-                        alert(errorData.error || 'Erreur lors de la mise à jour de l\'image de profil');
-                    }
-                } catch (error) {
-                    console.error('Erreur réseau lors de la mise à jour de l\'image de profil:', error);
-                    alert('Erreur réseau lors de la mise à jour de l\'image de profil');
-                }
+      };
+
+      const updateProfileImageForm = document.getElementById('updateProfileImageForm');
+      if (updateProfileImageForm) {
+        updateProfileImageForm.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const profileImageInput = document.getElementById('profileImageInput');
+          const profileImage = profileImageInput ? profileImageInput.files[0] : null;
+
+          const formData = new FormData();
+          if (profileImage) {
+            formData.append('profileImage', profileImage);
+          }
+
+          const token = localStorage.getItem('token');
+          if (!token) {
+            alert('Vous devez être connecté pour mettre à jour le profil');
+            return;
+          }
+
+          try {
+            const response = await fetch('/user/update-profile', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
             });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.profileImage) {
+                const profileImage = document.getElementById('profileImage');
+                if (profileImage) {
+                  profileImage.src = `/uploads/${data.profileImage}`;
+                }
+              }
+              modal.style.display = 'none';
+              alert('Image de profil mise à jour avec succès');
+            } else {
+              const errorData = await response.json();
+              alert(errorData.error || "Erreur lors de la mise à jour de l'image de profil");
+            }
+          } catch (error) {
+            console.error("Erreur réseau lors de la mise à jour de l'image de profil:", error);
+            alert("Erreur réseau lors de la mise à jour de l'image de profil");
+          }
+        });
+      }
+
+      // Handle post creation
+      const createPostForm = document.getElementById('createPostForm');
+      createPostForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const postContent = document.getElementById('postContent').value;
+        const postImage = document.getElementById('postImage').files[0];
+
+        const formData = new FormData();
+        formData.append('content', postContent);
+        if (postImage) {
+          formData.append('image', postImage);
         }
-  
-        console.log(document.getElementById('username-sidebar'));
-        console.log(document.getElementById('profileUsername'));
-        console.log(document.getElementById('profileImage'));
-        console.log(document.getElementById('profilePageProfileImage'));
-        console.log(document.getElementById('logoutButton'));
-        console.log(document.getElementById('updateProfileImageForm'));
-        console.log(document.getElementById('profileImageInput'));
+
+        try {
+          const response = await fetch('/posts/create', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to create post');
+          }
+
+          const newPost = await response.json();
+          const postsContainer = document.getElementById('postsContainer');
+          const postElement = createPostElement(newPost, currentUser);
+          postsContainer.prepend(postElement);
+          // Clear the form
+          createPostForm.reset();
+          attachEventListeners(); // Attach event listeners to the new post
+        } catch (error) {
+          console.error('Error creating post:', error);
+          alert('Failed to create post');
+        }
+      });
+
+      function createPostElement(post, currentUser) {
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.innerHTML = `
+          <div class="post-user">
+            <img src="/uploads/${post.user.profileImage}" alt="${post.user.username}" class="post-user-image">
+            ${post.user.username}
+            ${post.user._id === currentUser._id ? `
+              <div class="post-actions-menu">
+                <i class='bx bx-dots-horizontal-rounded'></i>
+                <div class="dropdown-menu">
+                  <span class="edit-post" data-id="${post._id}">Modifier</span>
+                  <span class="delete-post" data-id="${post._id}">Supprimer</span>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+          <div class="post-content">${he.decode(post.content)}</div>
+          <div class="post-actions">
+            <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
+            <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
+          </div>
+          <div class="comments" style="display: none;">
+            <div class="comment-list">
+              ${post.comments.map(comment => `
+                <div class="comment">
+                  <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
+                  <span class="comment-user">${comment.user.username}</span>
+                  <span class="comment-content">${he.decode(comment.content)}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="add-comment">
+              <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+              <button class="submit-comment" data-id="${post._id}">Commenter</button>
+            </div>
+          </div>
+        `;
+        if (post.image) {
+          const postImage = document.createElement('img');
+          postImage.src = `/uploads/${he.encode(post.image)}`;
+          postImage.classList.add('post-image');
+          postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
+        }
+        return postElement;
+      }
+
+      function attachEventListeners() {
+        document.querySelectorAll('.like').forEach((button) => {
+          button.removeEventListener('click', handleLike);
+          button.addEventListener('click', handleLike);
+        });
+
+        document.querySelectorAll('.comment').forEach((button) => {
+          button.removeEventListener('click', handleComment);
+          button.addEventListener('click', handleComment);
+        });
+
+        document.querySelectorAll('.submit-comment').forEach((button) => {
+          button.removeEventListener('click', handleSubmitComment);
+          button.addEventListener('click', handleSubmitComment);
+        });
+
+        document.querySelectorAll('.post-actions-menu').forEach((menu) => {
+          const dropdown = menu.querySelector('.dropdown-menu');
+          menu.querySelector('i').addEventListener('click', () => {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+          });
+        });
+
+        document.querySelectorAll('.edit-post').forEach((button) => {
+          button.removeEventListener('click', handleEditPost);
+          button.addEventListener('click', handleEditPost);
+        });
+
+        document.querySelectorAll('.delete-post').forEach((button) => {
+          button.removeEventListener('click', handleDeletePost);
+          button.addEventListener('click', handleDeletePost);
+        });
+      }
+
+      function handleLike() {
+        const postId = this.getAttribute('data-id');
+        fetch(`/posts/${postId}/like`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((updatedPost) => {
+            this.innerHTML = `<i class='bx bx-like'></i> Like (${updatedPost.likes.length})`;
+          })
+          .catch((error) => console.error('Error liking post:', error));
+      }
+
+      function handleComment() {
+        const commentsSection = this.closest('.post').querySelector('.comments');
+        commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+      }
+
+      function handleSubmitComment() {
+        const postId = this.getAttribute('data-id');
+        const commentInput = this.closest('.comments').querySelector('.comment-input');
+        const commentContent = commentInput.value.trim();
+        if (commentContent) {
+          fetch(`/posts/${postId}/comment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ content: he.encode(commentContent) }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Failed to comment on post');
+              }
+              return response.json();
+            })
+            .then((updatedPost) => {
+              const commentsList = this.closest('.comments').querySelector('.comment-list');
+              const newComment = document.createElement('div');
+              newComment.classList.add('comment');
+              const lastComment = updatedPost.comments[updatedPost.comments.length - 1];
+              newComment.innerHTML = `
+                <img src="/uploads/${he.encode(lastComment.user.profileImage)}" alt="${he.encode(lastComment.user.username)}" class="comment-user-image">
+                <span class="comment-user">${he.encode(lastComment.user.username)}</span>
+                <span class="comment-content">${he.encode(lastComment.content)}</span>
+              `;
+              commentsList.appendChild(newComment);
+              commentInput.value = '';
+            })
+            .catch((error) => console.error('Error commenting on post:', error));
+        }
+      }
+
+      function handleEditPost() {
+        const postId = this.getAttribute('data-id');
+        const postContentElement = document.querySelector(`.post[data-id="${postId}"] .post-content`);
+        const currentContent = postContentElement.textContent.trim();
+        const newContent = prompt('Modifier votre publication:', currentContent);
+        if (newContent) {
+          fetch(`/posts/${postId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ content: he.encode(newContent) }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Failed to edit post');
+              }
+              return response.json();
+            })
+            .then((updatedPost) => {
+              postContentElement.innerHTML = he.decode(updatedPost.content);
+            })
+            .catch((error) => console.error('Error editing post:', error));
+        }
+      }
+
+      function handleDeletePost() {
+        const postId = this.getAttribute('data-id');
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')) {
+          fetch(`/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Failed to delete post');
+              }
+              document.querySelector(`.post[data-id="${postId}"]`).remove();
+            })
+            .catch((error) => console.error('Error deleting post:', error));
+        }
+      }
+
+      // Initial attachment of event listeners
+      attachEventListeners();
+
+      console.log(document.getElementById('username-sidebar'));
+      console.log(document.getElementById('profileUsername'));
+      console.log(document.getElementById('profileImage'));
+      console.log(document.getElementById('profilePageProfileImage'));
+      console.log(document.getElementById('logoutButton'));
+      console.log(document.getElementById('updateProfileImageForm'));
+      console.log(document.getElementById('profileImageInput'));
     });
-    </script>
+  </script>
 </body>
 </html>

@@ -427,7 +427,7 @@ a {
     margin-bottom: 10px;
     border-radius: 4px;
     align-items: flex-start;
-    width: 375px;
+    width: 565px;
 }
 
 .post-user {
@@ -450,6 +450,38 @@ a {
     gap: 10px;
     margin-top: 10px;
 }
+
+.post-edit-delete {
+    position: relative;
+  }
+  
+  .post-menu-icon {
+    cursor: pointer;
+  }
+  
+  .post-menu {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    z-index: 1;
+  }
+  
+  .post-menu.show {
+    display: block;
+  }
+  
+  .post-menu span {
+    display: block;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .post-menu span:hover {
+    background-color: #f0f0f0;
+  }
 
 .like, .comment {
     cursor: pointer;
