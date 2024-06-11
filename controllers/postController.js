@@ -112,14 +112,15 @@ exports.deletePost = async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
+    // Vérifiez que l'utilisateur est bien l'auteur du post
     if (post.user.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: 'User not authorized' });
     }
 
     await post.remove();
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
     console.error('Error deleting post:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Failed to delete post' });
   }
 };

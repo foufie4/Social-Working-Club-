@@ -66,12 +66,12 @@
     document.addEventListener('DOMContentLoaded', function () {
       let sidebar = document.querySelector('.sidebar');
       let closeBtn = document.querySelector('#btn');
-  
+    
       closeBtn.addEventListener('click', () => {
         sidebar.classList.toggle('open');
         menuBtnChange();
       });
-  
+    
       function menuBtnChange() {
         if (sidebar.classList.contains('open')) {
           closeBtn.classList.replace('bx-menu', 'bx-menu-alt-right');
@@ -79,14 +79,14 @@
           closeBtn.classList.replace('bx-menu-alt-right', 'bx-menu');
         }
       }
-  
+    
       function updateSidebarProfileImage(imageUrl) {
         const profileImageElement = document.getElementById('profileImage');
         if (profileImageElement) {
           profileImageElement.src = imageUrl;
         }
       }
-
+    
       const token = localStorage.getItem('token');
       let currentUser;
       if (token) {
@@ -143,7 +143,7 @@
       } else {
         window.location.href = '/login.html';
       }
-
+    
       const logoutButton = document.getElementById('logoutButton');
       if (logoutButton) {
         logoutButton.addEventListener('click', function () {
@@ -152,48 +152,48 @@
           window.location.href = '/login.html';
         });
       }
-
+    
       // Modal logic
       const modal = document.getElementById('profileImageModal');
       const editProfileImage = document.getElementById('editProfileImage');
       const span = document.getElementsByClassName('close')[0];
-
+    
       if (editProfileImage) {
         editProfileImage.onclick = function () {
           modal.style.display = 'block';
         };
       }
-
+    
       if (span) {
         span.onclick = function () {
           modal.style.display = 'none';
         };
       }
-
+    
       window.onclick = function (event) {
         if (event.target == modal) {
           modal.style.display = 'none';
         }
       };
-
+    
       const updateProfileImageForm = document.getElementById('updateProfileImageForm');
       if (updateProfileImageForm) {
         updateProfileImageForm.addEventListener('submit', async function (e) {
           e.preventDefault();
           const profileImageInput = document.getElementById('profileImageInput');
           const profileImage = profileImageInput ? profileImageInput.files[0] : null;
-
+    
           const formData = new FormData();
           if (profileImage) {
             formData.append('profileImage', profileImage);
           }
-
+    
           const token = localStorage.getItem('token');
           if (!token) {
             alert('Vous devez être connecté pour mettre à jour le profil');
             return;
           }
-
+    
           try {
             const response = await fetch('/user/update-profile', {
               method: 'POST',
@@ -202,7 +202,7 @@
               },
               body: formData,
             });
-
+    
             if (response.ok) {
               const data = await response.json();
               if (data.profileImage) {
@@ -223,20 +223,20 @@
           }
         });
       }
-
+    
       // Handle post creation
       const createPostForm = document.getElementById('createPostForm');
       createPostForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         const postContent = document.getElementById('postContent').value;
         const postImage = document.getElementById('postImage').files[0];
-
+    
         const formData = new FormData();
         formData.append('content', postContent);
         if (postImage) {
           formData.append('image', postImage);
         }
-
+    
         try {
           const response = await fetch('/posts/create', {
             method: 'POST',
@@ -245,11 +245,11 @@
             },
             body: formData,
           });
-
+    
           if (!response.ok) {
             throw new Error('Failed to create post');
           }
-
+    
           const newPost = await response.json();
           const postsContainer = document.getElementById('postsContainer');
           const postElement = createPostElement(newPost, currentUser);
@@ -262,25 +262,28 @@
           alert('Failed to create post');
         }
       });
-
+    
       function createPostElement(post, currentUser) {
         const postElement = document.createElement('div');
         postElement.classList.add('post');
+        postElement.dataset.id = post._id; // Add this line to set the data-id attribute
         postElement.innerHTML = `
-          <div class="post-user">
+        <div class="post-user">
+          <div class="post-user-details">
             <img src="/uploads/${post.user.profileImage}" alt="${post.user.username}" class="post-user-image">
-            ${post.user.username}
-            ${post.user._id === currentUser._id ? `
-              <div class="post-actions-menu">
-                <i class='bx bx-dots-horizontal-rounded'></i>
-                <div class="dropdown-menu">
-                  <span class="edit-post" data-id="${post._id}">Modifier</span>
-                  <span class="delete-post" data-id="${post._id}">Supprimer</span>
-                </div>
-              </div>
-            ` : ''}
+            <span class="username">${post.user.username}</span>
           </div>
-          <div class="post-content">${he.decode(post.content)}</div>
+          ${post.user._id === currentUser._id ? `
+            <div class="post-actions-menu">
+              <i class='bx bx-dots-horizontal-rounded'></i>
+              <div class="dropdown-menu">
+                <span class="edit-post" data-id="${post._id}">Modifier</span>
+                <span class="delete-post" data-id="${post._id}">Supprimer</span>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+          <div class="post-content">${he.decode(post.content).replace(/\n/g, '<br>')}</div>
           <div class="post-actions">
             <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
             <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
@@ -291,7 +294,7 @@
                 <div class="comment">
                   <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
                   <span class="comment-user">${comment.user.username}</span>
-                  <span class="comment-content">${he.decode(comment.content)}</span>
+                  <span class="comment-content">${he.decode(comment.content).replace(/\n/g, '<br>')}</span>
                 </div>
               `).join('')}
             </div>
@@ -308,42 +311,42 @@
           postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
         }
         return postElement;
-      }
-
+    }
+    
       function attachEventListeners() {
         document.querySelectorAll('.like').forEach((button) => {
           button.removeEventListener('click', handleLike);
           button.addEventListener('click', handleLike);
         });
-
+    
         document.querySelectorAll('.comment').forEach((button) => {
           button.removeEventListener('click', handleComment);
           button.addEventListener('click', handleComment);
         });
-
+    
         document.querySelectorAll('.submit-comment').forEach((button) => {
           button.removeEventListener('click', handleSubmitComment);
           button.addEventListener('click', handleSubmitComment);
         });
-
+    
         document.querySelectorAll('.post-actions-menu').forEach((menu) => {
           const dropdown = menu.querySelector('.dropdown-menu');
           menu.querySelector('i').addEventListener('click', () => {
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            dropdown.classList.toggle('show');
           });
         });
-
+    
         document.querySelectorAll('.edit-post').forEach((button) => {
           button.removeEventListener('click', handleEditPost);
           button.addEventListener('click', handleEditPost);
         });
-
+    
         document.querySelectorAll('.delete-post').forEach((button) => {
           button.removeEventListener('click', handleDeletePost);
           button.addEventListener('click', handleDeletePost);
         });
       }
-
+    
       function handleLike() {
         const postId = this.getAttribute('data-id');
         fetch(`/posts/${postId}/like`, {
@@ -359,12 +362,12 @@
           })
           .catch((error) => console.error('Error liking post:', error));
       }
-
+    
       function handleComment() {
         const commentsSection = this.closest('.post').querySelector('.comments');
         commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
       }
-
+    
       function handleSubmitComment() {
         const postId = this.getAttribute('data-id');
         const commentInput = this.closest('.comments').querySelector('.comment-input');
@@ -400,34 +403,57 @@
             .catch((error) => console.error('Error commenting on post:', error));
         }
       }
-
+    
       function handleEditPost() {
         const postId = this.getAttribute('data-id');
         const postContentElement = document.querySelector(`.post[data-id="${postId}"] .post-content`);
         const currentContent = postContentElement.textContent.trim();
-        const newContent = prompt('Modifier votre publication:', currentContent);
-        if (newContent) {
-          fetch(`/posts/${postId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ content: he.encode(newContent) }),
-          })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error('Failed to edit post');
-              }
-              return response.json();
+    
+        // Create an editable textarea
+        const editTextarea = document.createElement('textarea');
+        editTextarea.value = currentContent;
+        editTextarea.classList.add('edit-textarea');
+    
+        // Create a save button
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Sauvegarder';
+        saveButton.classList.add('save-button');
+    
+        // Replace the post content with the editable textarea and save button
+        postContentElement.innerHTML = '';
+        postContentElement.appendChild(editTextarea);
+        postContentElement.appendChild(saveButton);
+    
+        // Close the dropdown menu
+        closeAllDropdowns();
+    
+        saveButton.addEventListener('click', () => {
+          const newContent = editTextarea.value.trim();
+          if (newContent && newContent !== currentContent) {
+            fetch(`/posts/${postId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ content: he.encode(newContent) }),
             })
-            .then((updatedPost) => {
-              postContentElement.innerHTML = he.decode(updatedPost.content);
-            })
-            .catch((error) => console.error('Error editing post:', error));
-        }
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Failed to edit post');
+                }
+                return response.json();
+              })
+              .then((updatedPost) => {
+                postContentElement.innerHTML = he.decode(updatedPost.content);
+              })
+              .catch((error) => console.error('Error editing post:', error));
+          } else {
+            postContentElement.innerHTML = currentContent;
+          }
+        });
       }
-
+    
       function handleDeletePost() {
         const postId = this.getAttribute('data-id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')) {
@@ -440,17 +466,26 @@
           })
             .then((response) => {
               if (!response.ok) {
-                throw new Error('Failed to delete post');
+                return response.json().then((error) => {
+                  throw new Error(error.error || 'Failed to delete post');
+                });
               }
               document.querySelector(`.post[data-id="${postId}"]`).remove();
             })
             .catch((error) => console.error('Error deleting post:', error));
         }
+        // Close the dropdown menu
+        closeAllDropdowns();
       }
-
+    
+      function closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-menu').forEach((dropdown) => {
+          dropdown.classList.remove('show');
+        });
+      }
       // Initial attachment of event listeners
       attachEventListeners();
-
+    
       console.log(document.getElementById('username-sidebar'));
       console.log(document.getElementById('profileUsername'));
       console.log(document.getElementById('profileImage'));
