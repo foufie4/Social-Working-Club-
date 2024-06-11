@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -6,30 +5,42 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const passport = require('passport');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const LocalStrategy = require('passport-local').Strategy;
+const bcrypt = require('bcrypt');
+const User = require('./models/user');
+const app = express();
 const helmet = require('helmet');
 const xss = require('xss-clean');
 
-const UserRouter = require('./routes/userRoutes');
-const PostRouter = require('./routes/postRoutes');
-const AdminRouter = require('./routes/adminRoutes');
+const UserRoutes = require('./routes/userRoutes');
+const PostRoutes = require('./routes/postRoutes');
+const AdminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 
-const app = express();
 const { MONGO_URI, PORT = 5000 } = process.env;
-
 mongoose.connect(MONGO_URI, {
   serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
 })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(session({secret: 'W1lly_W0nk4', resave: false, saveUninitialized: false}));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
 app.use(helmet());
 app.use(xss());
 
@@ -45,9 +56,111 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 app.use('/auth', authRoutes);
-app.use('/user', UserRouter);
-app.use('/posts', upload.single('image'), PostRouter);
-app.use('/admin', AdminRouter);
+app.use('/user', UserRoutes);
+app.use('/posts', upload.single('image'), PostRoutes);
+app.use('/admin', AdminRoutes);
+
+app.get("./index", function (req, res) {
+  res.render("home");
+});
+
+// Updated /profil route to send static HTML file
+app.get("./profil", isLoggedIn, function (req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'profil.html'));
+});
+
+app.get("./register", function (req, res) {
+  res.render("register");
+});
+
+app.post("./register", async (req, res) => {
+  try {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      const user = new User({
+          username: req.body.username,
+          email: req.body.email,
+          password: hashedPassword
+      });
+      await user.save();
+      return res.status(200).json(user);
+  } catch (error) {
+      return res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("./login", function (req, res) {
+  res.render("login");
+});
+
+app.post("./login", (req, res, next) => {
+  console.log(`Attempting to login with email: ${req.body.email} and password: ${req.body.password}`);
+  passport.authenticate('local', (err, user, info) => {
+      if (err) {
+          console.error('Authentication error:', err);
+          return next(err);
+      }
+      if (!user) {
+          console.log('Authentication failed:', info.message);
+          return res.redirect('./login');
+      }
+      req.logIn(user, (err) => {
+          if (err) {
+              console.error('Login error:', err);
+              return next(err);
+          }
+          return res.redirect('./profil');
+      });
+  })(req, res, next);
+});
+
+passport.use(new LocalStrategy({
+  usernameField: 'email',
+  passwordField: 'password'
+},
+async (email, password, done) => {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log('No user found with email:', email);
+      return done(null, false, { message: 'Incorrect email.' });
+    }
+    const isMatch = await user.comparePassword(password);
+    console.log('Comparing', password, 'with', user.password, ':', isMatch);
+    if (!isMatch) {
+      return done(null, false, { message: 'Incorrect password.' });
+    }
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
+}
+));
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+      const user = await User.findById(id);
+      done(null, user);
+  } catch (err) {
+      done(err, null);
+  }
+});
+
+app.get("./logout", function (req, res) {
+  req.logout(function(err) {
+      if (err) { return next(err); }
+      res.redirect('/');
+  });
+});
+
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  res.redirect("./login");
+}
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

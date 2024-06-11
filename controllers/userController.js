@@ -74,3 +74,7 @@ exports.updateUserProfile = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.adminDashboard = (req, res) => {
+  res.send('Admin Dashboard');
+};

@@ -16,11 +16,14 @@ userSchema.pre('save', async function(next) {
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  console.log('Hashed password in pre-save:', this.password);
   next();
 });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
+  console.log('Comparing', candidatePassword, 'with', this.password, ':', isMatch);
+  return isMatch;
 };
 
 const User = mongoose.model('User', userSchema);
