@@ -12,11 +12,11 @@ exports.createPost = async (req, res) => {
   try {
     const newPost = new Post({
       user: req.user.id,
-      content: he.encode(content), // Échappement du contenu
+      content: he.encode(content),
       image
     });
     await newPost.save();
-    await newPost.populate('user', 'username profileImage').execPopulate();
+    await newPost.populate('user', 'username profileImage');
     res.status(201).json(newPost);
   } catch (error) {
     console.error('Error creating post:', error);
@@ -33,22 +33,7 @@ exports.getPosts = async (req, res) => {
         select: 'username profileImage'
       }
     });
-    res.status(200).json(posts.map(post => ({
-      ...post.toObject(),
-      content: he.encode(post.content),
-      user: {
-        ...post.user.toObject(),
-        username: he.encode(post.user.username)
-      },
-      comments: post.comments.map(comment => ({
-        ...comment.toObject(),
-        content: he.encode(comment.content),
-        user: {
-          ...comment.user.toObject(),
-          username: he.encode(comment.user.username)
-        }
-      }))
-    })));
+    res.status(200).json(posts);
   } catch (error) {
     console.error('Error fetching posts:', error);
     res.status(500).json({ error: 'Server error' });
@@ -95,5 +80,46 @@ exports.commentPost = async (req, res) => {
   } catch (error) {
     console.error('Error commenting on post:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.updatePost = async (req, res) => {
+  const { content } = req.body;
+
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    if (post.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    post.content = he.encode(content);
+    await post.save();
+    res.status(200).json(post);
+  } catch (error) {
+    console.error('Error updating post:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.deletePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    if (post.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    await post.remove();
+    res.status(200).json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    res.status(500).json({ error: 'Failed to delete post' });
   }
 };

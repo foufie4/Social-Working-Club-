@@ -410,34 +410,88 @@ a {
 }
 
 .posts {
-    max-width: 600px;
     margin: auto;
     display: grid;
     gap: 20px;
-    padding: 20px;
+    padding: 5px;
     justify-content: center;
-    justify-items: center;
 }
 
 .post {
     display: flex;
     flex-direction: column;
-    background-color: #f9f9f9;
+    /* background-color: #f9f9f9; */
     padding: 20px;
-    margin-bottom: 10px;
-    border-radius: 4px;
+    margin-bottom: 6px;
+    border-radius: 25px;
     align-items: flex-start;
-    width: 375px;
+    width: 850px;
+    position: relative;
 }
 
 .post-user {
     font-weight: bold;
     display: flex;
+    width: 100%;
+    justify-content: space-between;
     align-items: center;
+}
+
+.post-user-details {
+    display: flex;
+    align-items: center;
+}
+
+.post-user-image {
+    height: 60px;
+    width: 60px;
+    border-radius: 30px;
+    margin-right: 10px;
+}
+
+.post-actions-menu {
+    position: relative;
+}
+
+.post-actions-menu i {
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    z-index: 1;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.dropdown-menu span {
+    display: block;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: #333;
+}
+
+.dropdown-menu span:hover {
+    background-color: #f0f0f0;
+}
+
+.post-actions-menu .dropdown-menu.show {
+    display: block;
 }
 
 .post-content {
     margin-top: 5px;
+}
+
+.post-content,
+.comment-content {
+    white-space: pre-wrap;
 }
 
 .post-image {
@@ -450,6 +504,60 @@ a {
     gap: 10px;
     margin-top: 10px;
 }
+
+.post-edit-delete {
+    position: relative;
+  }
+  
+  .post-menu-icon {
+    cursor: pointer;
+  }
+  
+  .post-menu {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    z-index: 1;
+  }
+  
+  .post-menu.show {
+    display: block;
+  }
+  
+  .post-menu span {
+    display: block;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .post-menu span:hover {
+    background-color: #f0f0f0;
+  }
+
+  .edit-textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .save-button {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #4267b2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .save-button:hover {
+    background-color: #365899;
+  }
 
 .like, .comment {
     cursor: pointer;
