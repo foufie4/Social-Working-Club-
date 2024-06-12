@@ -173,10 +173,19 @@
           <div class="comments" style="display: none;">
             <div class="comment-list">
               ${post.comments.map(comment => `
-                <div class="comment">
+                <div class="comment" data-comment-id="${comment._id}">
                   <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
                   <span class="comment-user">${comment.user.username}</span>
                   <span class="comment-content">${he.decode(comment.content).replace(/\n/g, '<br>')}</span>
+                  ${(comment.user._id === currentUser._id || currentUser.role === 'admin') ? `
+                    <div class="comment-actions-menu">
+                      <i class='bx bx-dots-horizontal-rounded'></i>
+                      <div class="dropdown-menu">
+                        <span class="edit-comment" data-comment-id="${comment._id}">Modifier</span>
+                        <span class="delete-comment" data-comment-id="${comment._id}">Supprimer</span>
+                      </div>
+                    </div>
+                  ` : ''}
                 </div>
               `).join('')}
             </div>
@@ -211,9 +220,28 @@
           button.addEventListener('click', handleSubmitComment);
         });
     
+        document.querySelectorAll('.edit-comment').forEach((button) => {
+          button.removeEventListener('click', handleEditComment);
+          button.addEventListener('click', handleEditComment);
+        });
+    
+        document.querySelectorAll('.delete-comment').forEach((button) => {
+          button.removeEventListener('click', handleDeleteComment);
+          button.addEventListener('click', handleDeleteComment);
+        });
+    
         document.querySelectorAll('.post-actions-menu').forEach((menu) => {
           const dropdown = menu.querySelector('.dropdown-menu');
-          menu.querySelector('i').addEventListener('click', () => {
+          menu.querySelector('i').addEventListener('click', (event) => {
+            event.stopPropagation(); // Empêche la fermeture des commentaires lors du clic sur le menu
+            dropdown.classList.toggle('show');
+          });
+        });
+    
+        document.querySelectorAll('.comment-actions-menu').forEach((menu) => {
+          const dropdown = menu.querySelector('.dropdown-menu');
+          menu.querySelector('i').addEventListener('click', (event) => {
+            event.stopPropagation(); // Empêche la fermeture des commentaires lors du clic sur le menu
             dropdown.classList.toggle('show');
           });
         });
@@ -231,6 +259,8 @@
     
       function handleLike() {
         const postId = this.getAttribute('data-id');
+        const token = localStorage.getItem('token');
+
         fetch(`/posts/${postId}/like`, {
           method: 'POST',
           headers: {
@@ -360,11 +390,89 @@
         closeAllDropdowns();
       }
     
+      function handleEditComment() {
+        const commentId = this.getAttribute('data-comment-id');
+        const commentContentElement = document.querySelector(`.comment[data-comment-id="${commentId}"] .comment-content`);
+        const currentContent = commentContentElement.textContent.trim();
+      
+        // Create an editable textarea
+        const editTextarea = document.createElement('textarea');
+        editTextarea.value = currentContent;
+        editTextarea.classList.add('edit-textarea');
+      
+        // Create a save button
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Sauvegarder';
+        saveButton.classList.add('save-button');
+      
+        // Replace the comment content with the editable textarea and save button
+        commentContentElement.innerHTML = '';
+        commentContentElement.appendChild(editTextarea);
+        commentContentElement.appendChild(saveButton);
+      
+        saveButton.addEventListener('click', () => {
+          const newContent = editTextarea.value.trim();
+          if (newContent && newContent !== currentContent) {
+            fetch(`/posts/comments/${commentId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ content: he.encode(newContent) }),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Failed to edit comment');
+                }
+                return response.json();
+              })
+              .then(() => {
+                commentContentElement.innerHTML = he.decode(newContent);
+              })
+              .catch((error) => console.error('Error editing comment:', error));
+          } else {
+            commentContentElement.innerHTML = currentContent;
+          }
+        });
+      }
+      
+      function handleDeleteComment() {
+        const commentId = this.getAttribute('data-comment-id');
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+          fetch(`/posts/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                return response.json().then((error) => {
+                  throw new Error(error.error || 'Failed to delete comment');
+                });
+              }
+              document.querySelector(`.comment[data-comment-id="${commentId}"]`).remove();
+            })
+            .catch((error) => console.error('Error deleting comment:', error));
+        }
+        // Close the dropdown menu
+        closeAllDropdowns();
+      }
+
       function closeAllDropdowns() {
         document.querySelectorAll('.dropdown-menu').forEach((dropdown) => {
           dropdown.classList.remove('show');
         });
       }
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.comment-actions-menu') && !event.target.closest('.post-actions-menu')) {
+          closeAllDropdowns();
+        }
+      });
+
       // Initial attachment of event listeners
       attachEventListeners();
     

@@ -123,3 +123,47 @@ exports.deletePost = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete post' });
   }
 };
+
+exports.updateComment = async (req, res) => {
+  const { content } = req.body;
+
+  try {
+    const post = await Post.findOne({ 'comments._id': req.params.commentId });
+    if (!post) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    const comment = post.comments.id(req.params.commentId);
+    if (comment.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    comment.content = he.encode(content);
+    await post.save();
+    res.status(200).json(post);
+  } catch (error) {
+    console.error('Error updating comment:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.deleteComment = async (req, res) => {
+  try {
+    const post = await Post.findOne({ 'comments._id': req.params.commentId });
+    if (!post) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    const comment = post.comments.id(req.params.commentId);
+    if (comment.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    comment.remove();
+    await post.save();
+    res.status(200).json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+};
