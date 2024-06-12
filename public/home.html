@@ -144,145 +144,27 @@
         window.location.href = '/login.html';
       }
     
-      const logoutButton = document.getElementById('logoutButton');
-      if (logoutButton) {
-        logoutButton.addEventListener('click', function () {
-          localStorage.removeItem('token');
-          localStorage.removeItem('username');
-          window.location.href = '/login.html';
-        });
-      }
-    
-      // Modal logic
-      const modal = document.getElementById('profileImageModal');
-      const editProfileImage = document.getElementById('editProfileImage');
-      const span = document.getElementsByClassName('close')[0];
-    
-      if (editProfileImage) {
-        editProfileImage.onclick = function () {
-          modal.style.display = 'block';
-        };
-      }
-    
-      if (span) {
-        span.onclick = function () {
-          modal.style.display = 'none';
-        };
-      }
-    
-      window.onclick = function (event) {
-        if (event.target == modal) {
-          modal.style.display = 'none';
-        }
-      };
-    
-      const updateProfileImageForm = document.getElementById('updateProfileImageForm');
-      if (updateProfileImageForm) {
-        updateProfileImageForm.addEventListener('submit', async function (e) {
-          e.preventDefault();
-          const profileImageInput = document.getElementById('profileImageInput');
-          const profileImage = profileImageInput ? profileImageInput.files[0] : null;
-    
-          const formData = new FormData();
-          if (profileImage) {
-            formData.append('profileImage', profileImage);
-          }
-    
-          const token = localStorage.getItem('token');
-          if (!token) {
-            alert('Vous devez être connecté pour mettre à jour le profil');
-            return;
-          }
-    
-          try {
-            const response = await fetch('/user/update-profile', {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-              body: formData,
-            });
-    
-            if (response.ok) {
-              const data = await response.json();
-              if (data.profileImage) {
-                const profileImage = document.getElementById('profileImage');
-                if (profileImage) {
-                  profileImage.src = `/uploads/${data.profileImage}`;
-                }
-              }
-              modal.style.display = 'none';
-              alert('Image de profil mise à jour avec succès');
-            } else {
-              const errorData = await response.json();
-              alert(errorData.error || "Erreur lors de la mise à jour de l'image de profil");
-            }
-          } catch (error) {
-            console.error("Erreur réseau lors de la mise à jour de l'image de profil:", error);
-            alert("Erreur réseau lors de la mise à jour de l'image de profil");
-          }
-        });
-      }
-    
-      // Handle post creation
-      const createPostForm = document.getElementById('createPostForm');
-      createPostForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const postContent = document.getElementById('postContent').value;
-        const postImage = document.getElementById('postImage').files[0];
-    
-        const formData = new FormData();
-        formData.append('content', postContent);
-        if (postImage) {
-          formData.append('image', postImage);
-        }
-    
-        try {
-          const response = await fetch('/posts/create', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-          });
-    
-          if (!response.ok) {
-            throw new Error('Failed to create post');
-          }
-    
-          const newPost = await response.json();
-          const postsContainer = document.getElementById('postsContainer');
-          const postElement = createPostElement(newPost, currentUser);
-          postsContainer.prepend(postElement);
-          // Clear the form
-          createPostForm.reset();
-          attachEventListeners(); // Attach event listeners to the new post
-        } catch (error) {
-          console.error('Error creating post:', error);
-          alert('Failed to create post');
-        }
-      });
-    
+      // Function to create a post element
       function createPostElement(post, currentUser) {
         const postElement = document.createElement('div');
         postElement.classList.add('post');
-        postElement.dataset.id = post._id; // Add this line to set the data-id attribute
+        postElement.dataset.id = post._id;
         postElement.innerHTML = `
-        <div class="post-user">
-          <div class="post-user-details">
-            <img src="/uploads/${post.user.profileImage}" alt="${post.user.username}" class="post-user-image">
-            <span class="username">${post.user.username}</span>
-          </div>
-          ${post.user._id === currentUser._id ? `
-            <div class="post-actions-menu">
-              <i class='bx bx-dots-horizontal-rounded'></i>
-              <div class="dropdown-menu">
-                <span class="edit-post" data-id="${post._id}">Modifier</span>
-                <span class="delete-post" data-id="${post._id}">Supprimer</span>
-              </div>
+          <div class="post-user">
+            <div class="post-user-details">
+              <img src="/uploads/${post.user.profileImage}" alt="${post.user.username}" class="post-user-image">
+              <span class="username">${post.user.username}</span>
             </div>
-          ` : ''}
-        </div>
+            ${(post.user._id === currentUser._id || currentUser.role === 'admin') ? `
+              <div class="post-actions-menu">
+                <i class='bx bx-dots-horizontal-rounded'></i>
+                <div class="dropdown-menu">
+                  <span class="edit-post" data-id="${post._id}">Modifier</span>
+                  <span class="delete-post" data-id="${post._id}">Supprimer</span>
+                </div>
+              </div>
+            ` : ''}
+          </div>
           <div class="post-content">${he.decode(post.content).replace(/\n/g, '<br>')}</div>
           <div class="post-actions">
             <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
@@ -311,7 +193,7 @@
           postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
         }
         return postElement;
-    }
+      }
     
       function attachEventListeners() {
         document.querySelectorAll('.like').forEach((button) => {
