@@ -27,26 +27,19 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
-  console.log(`Attempting to login with email: ${email} and password: ${password}`);
 
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      console.log(`User not found: ${email}`);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
-    console.log(`User found: ${user.email}`);
 
     const isValidPassword = await user.comparePassword(password);
-    console.log(`Is valid password: ${isValidPassword}`);
-
     if (!isValidPassword) {
-      console.log(`Invalid password for user: ${email}`);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    console.log('Login successful');
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login successful', token, username: user.username });
   } catch (error) {
     console.error('Server error during login:', error);
