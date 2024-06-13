@@ -19,7 +19,8 @@ const app = express();
 const { MONGO_URI, PORT = 5000, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
 
 mongoose.connect(MONGO_URI, {
-  serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
+  serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+  socketTimeoutMS: 30000, // Increase socket timeout to 30 seconds
 })
   .then(() => {
     console.log('Connected to MongoDB');

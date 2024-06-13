@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, unique: true, index: true },
   password: { type: String, required: true },
   profileImage: { type: String, default: 'default-profile.png' },
   verified: { type: Boolean, default: false },
@@ -22,5 +22,7 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
+
+userSchema.index({ email: 1 });
 
 module.exports = mongoose.model('User', userSchema);
