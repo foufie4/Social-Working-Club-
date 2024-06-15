@@ -365,7 +365,7 @@
           }
         });
       }
-    
+
       function handleDeletePost() {
         const postId = this.getAttribute('data-id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')) {
@@ -373,7 +373,7 @@
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
           })
             .then((response) => {

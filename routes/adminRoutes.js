@@ -21,6 +21,7 @@ router.delete('/user/:id', async (req, res) => {
 // Route pour supprimer une publication
 router.delete('/post/:id', async (req, res) => {
   try {
+    console.log('Admin attempting to delete post:', req.user);
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Post deleted' });
   } catch (error) {

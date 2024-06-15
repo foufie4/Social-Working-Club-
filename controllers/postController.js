@@ -107,16 +107,23 @@ exports.updatePost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
   try {
+    console.log('User attempting to delete post:', req.user);
+    console.log('Is admin:', req.isAdmin);
+
     const post = await Post.findById(req.params.id);
     if (!post) {
+      console.log('Post not found');
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    if (post.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    console.log('Post found:', post);
+
+    if (post.user.toString() !== req.user.id && !req.isAdmin) {
+      console.log('Unauthorized delete attempt');
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    await post.remove();
+    await Post.deleteOne({ _id: req.params.id });
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
     console.error('Error deleting post:', error);

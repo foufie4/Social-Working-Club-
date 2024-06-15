@@ -1,14 +1,18 @@
-const user = require('../models/user');
+const User = require('../models/user');
 
 const checkAdmin = async (req, res, next) => {
   try {
-    const user = await user.findById(req.user.id);
+    const user = await User.findById(req.user.id);
     if (user && user.role === 'admin') {
+      req.isAdmin = true;
+      console.log('Admin user:', user);
       next();
     } else {
-      res.status(403).json({ error: 'Access denied' });
+      req.isAdmin = false;
+      console.log('Non-admin user:', user); 
     }
   } catch (error) {
+    console.log('Server error in checkAdmin:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
