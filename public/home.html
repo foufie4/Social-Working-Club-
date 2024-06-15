@@ -166,41 +166,38 @@
             ` : ''}
           </div>
           <div class="post-content">${he.decode(post.content).replace(/\n/g, '<br>')}</div>
+          ${post.image ? `<img src="/uploads/${he.encode(post.image)}" class="post-image">` : ''}
           <div class="post-actions">
             <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
             <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
           </div>
-          <div class="comments" style="display: none;">
-            <div class="comment-list">
-              ${post.comments.map(comment => `
-                <div class="comment" data-comment-id="${comment._id}">
+         <div class="comments" style="display: none;">
+          <div class="comment-list">
+            ${post.comments.map(comment => `
+              <div class="comment" data-comment-id="${comment._id}">
+                <div class="comment-details">
                   <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
                   <span class="comment-user">${comment.user.username}</span>
                   <span class="comment-content">${he.decode(comment.content).replace(/\n/g, '<br>')}</span>
-                  ${(comment.user._id === currentUser._id || currentUser.role === 'admin') ? `
-                    <div class="comment-actions-menu">
-                      <i class='bx bx-dots-horizontal-rounded'></i>
-                      <div class="dropdown-menu">
-                        <span class="edit-comment" data-comment-id="${comment._id}">Modifier</span>
-                        <span class="delete-comment" data-comment-id="${comment._id}">Supprimer</span>
-                      </div>
-                    </div>
-                  ` : ''}
                 </div>
-              `).join('')}
-            </div>
-            <div class="add-comment">
-              <textarea class="comment-input" placeholder="Add a comment..."></textarea>
-              <button class="submit-comment" data-id="${post._id}">Commenter</button>
-            </div>
+                ${(comment.user._id === currentUser._id || currentUser.role === 'admin') ? `
+                  <div class="comment-actions-menu">
+                    <i class='bx bx-dots-horizontal-rounded'></i>
+                    <div class="dropdown-menu">
+                      <span class="edit-comment" data-comment-id="${comment._id}">Modifier</span>
+                      <span class="delete-comment" data-comment-id="${comment._id}">Supprimer</span>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
+          <div class="add-comment">
+            <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+            <button class="submit-comment" data-id="${post._id}">Commenter</button>
+          </div>
+        </div>
         `;
-        if (post.image) {
-          const postImage = document.createElement('img');
-          postImage.src = `/uploads/${he.encode(post.image)}`;
-          postImage.classList.add('post-image');
-          postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
-        }
         return postElement;
       }
     
@@ -303,14 +300,23 @@
               const commentsList = this.closest('.comments').querySelector('.comment-list');
               const newComment = document.createElement('div');
               newComment.classList.add('comment');
-              const lastComment = updatedPost.comments[updatedPost.comments.length - 1];
               newComment.innerHTML = `
-                <img src="/uploads/${he.encode(lastComment.user.profileImage)}" alt="${he.encode(lastComment.user.username)}" class="comment-user-image">
-                <span class="comment-user">${he.encode(lastComment.user.username)}</span>
-                <span class="comment-content">${he.encode(lastComment.content)}</span>
+                <div class="comment-details">
+                  <img src="/uploads/${he.encode(updatedPost.comments[updatedPost.comments.length - 1].user.profileImage)}" alt="${he.encode(updatedPost.comments[updatedPost.comments.length - 1].user.username)}" class="comment-user-image">
+                  <span class="comment-user">${he.encode(updatedPost.comments[updatedPost.comments.length - 1].user.username)}</span>
+                  <span class="comment-content">${he.encode(updatedPost.comments[updatedPost.comments.length - 1].content)}</span>
+                </div>
+                <div class="comment-actions-menu">
+                  <i class='bx bx-dots-horizontal-rounded'></i>
+                  <div class="dropdown-menu">
+                    <span class="edit-comment" data-comment-id="${updatedPost.comments[updatedPost.comments.length - 1]._id}">Modifier</span>
+                    <span class="delete-comment" data-comment-id="${updatedPost.comments[updatedPost.comments.length - 1]._id}">Supprimer</span>
+                  </div>
+                </div>
               `;
               commentsList.appendChild(newComment);
               commentInput.value = '';
+              attachEventListeners();
             })
             .catch((error) => console.error('Error commenting on post:', error));
         }
@@ -365,7 +371,7 @@
           }
         });
       }
-
+    
       function handleDeletePost() {
         const postId = this.getAttribute('data-id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')) {

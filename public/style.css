@@ -346,6 +346,7 @@ a {
 .submit-post {
     height: 50px;
 }
+
 .create-post {
     background-color: #fff;
     padding: 20px;
@@ -571,69 +572,135 @@ a {
     margin-right: 5px;
 }
 
-.comment {
-    margin-left: 20px;
+
+.textare#postContent {
+    background-color: #1d1b31;
+    color: #fff;
+    border: 1px solid #444;
 }
 
 .comments {
     margin-top: 10px;
     border-top: 1px solid #ddd;
     padding-top: 10px;
-}
-
-.comment-list {
+    width: 100%;
+    position: relative;
+  }
+  
+  .comment-list {
     max-height: 200px;
     overflow-y: auto;
-}
-
-.add-comment {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .comment {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .comment-details {
     display: flex;
     align-items: center;
-    margin-top: 10px;
-    flex-direction: column;
-}
-
-.comment-input {
-    flex: 1;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-right: 10px;
-}
-
-.submit-comment {
-    background-color: #4267b2;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    margin: 10px;
-}
-
-.submit-comment:hover {
-    background-color: #365899;
-}
-
-.comment-user {
+    width: 90%;
+  }
+  
+  .comment-user {
     font-weight: bold;
     margin-right: 5px;
-}
-
-.comment-user-image {
+  }
+  
+  .comment-user-image {
     height: 40px;
     width: 40px;
     border-radius: 30px;
-    margin: 5px;
-}
-
-.comment-content {
-    display: inline-block;
-}
-
-.comment {
-    margin-bottom: 5px;
-}
+    margin-right: 10px;
+  }
+  
+  .comment-content {
+    white-space: pre-wrap;
+  }
+  
+  .comment-actions-menu {
+    position: relative;
+  }
+  
+  .comment-actions-menu i {
+    cursor: pointer;
+  }
+  
+  .comment-actions-menu .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    z-index: 2; /* Ensure it is above other content */
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+  }
+  
+  .comment-actions-menu .dropdown-menu span {
+    display: block;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .comment-actions-menu .dropdown-menu span:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .comment-actions-menu .dropdown-menu.show {
+    display: block;
+  }
+  
+  .add-comment {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .comment-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #1d1b31;
+    font-size: 16px;
+    color: #fff;
+    resize: none;
+  }
+  
+  .comment-input:focus {
+    border-color: #4267b2;
+    outline: none;
+    box-shadow: 0 0 8px rgba(66, 103, 178, 0.6);
+  }
+  
+  .submit-comment {
+    align-self: flex-end;
+    background-color: #4267b2;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-comment:hover {
+    background-color: #365899;
+  }
 
 .post-actions hover {
     opacity: 0.8;
