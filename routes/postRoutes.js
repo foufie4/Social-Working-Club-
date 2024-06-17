@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const authenticateJWT = require('../middleware/authJWT');
-const checkAdmin = require('../middleware/checkAdmin');
 const PostController = require('../controllers/postController');
 const multer = require('multer');
 const path = require('path');
@@ -23,7 +22,7 @@ router.post('/:id/like', authenticateJWT, PostController.likePost);
 router.post('/:id/comment', authenticateJWT, PostController.commentPost);
 router.put('/:id', authenticateJWT, PostController.updatePost);
 router.put('/comments/:commentId', authenticateJWT, PostController.updateComment);
-router.delete('/:id', authenticateJWT, checkAdmin, PostController.deletePost);
+router.delete('/:id', authenticateJWT, PostController.deletePost);
 router.delete('/comments/:commentId', authenticateJWT, PostController.deleteComment);
 
 module.exports = router;

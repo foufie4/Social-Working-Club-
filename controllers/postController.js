@@ -166,7 +166,7 @@ exports.deleteComment = async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    comment.remove();
+    post.comments.pull(req.params.commentId);
     await post.save();
     res.status(200).json({ message: 'Comment deleted successfully' });
   } catch (error) {

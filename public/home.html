@@ -252,6 +252,13 @@
           button.removeEventListener('click', handleDeletePost);
           button.addEventListener('click', handleDeletePost);
         });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (event) => {
+          if (!event.target.closest('.comment-actions-menu') && !event.target.closest('.post-actions-menu')) {
+            closeAllDropdowns();
+          }
+        });
       }
     
       function handleLike() {
@@ -272,7 +279,8 @@
           .catch((error) => console.error('Error liking post:', error));
       }
     
-      function handleComment() {
+      function handleComment(event) {
+        event.stopPropagation(); // Prevent the click from closing the comments section
         const commentsSection = this.closest('.post').querySelector('.comments');
         commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
       }
@@ -442,7 +450,7 @@
           }
         });
       }
-      
+
       function handleDeleteComment() {
         const commentId = this.getAttribute('data-comment-id');
         if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
@@ -450,18 +458,19 @@
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
           })
-            .then((response) => {
-              if (!response.ok) {
-                return response.json().then((error) => {
-                  throw new Error(error.error || 'Failed to delete comment');
-                });
-              }
-              document.querySelector(`.comment[data-comment-id="${commentId}"]`).remove();
-            })
-            .catch((error) => console.error('Error deleting comment:', error));
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((error) => {
+                console.log('Error response from server:', error);
+                throw new Error(error.error || 'Failed to delete comment');
+              });
+            }
+            document.querySelector(`.comment[data-comment-id="${commentId}"]`).remove();
+          })
+          .catch((error) => console.error('Error deleting comment:', error));
         }
         // Close the dropdown menu
         closeAllDropdowns();
