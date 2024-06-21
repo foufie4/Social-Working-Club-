@@ -28,13 +28,15 @@ JWT_SECRET=your_jwt_secret
 ADMIN_USERNAME=admin
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=admin_password
+```
 
-### Running the Application
+## Running the Application
 
 **Start the server**
-
+```
 npm start
+```
 
-** Access the application **
+## Access the application
 
 Open your browser and go to http://localhost:5000
