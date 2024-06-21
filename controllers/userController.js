@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
@@ -14,9 +15,9 @@ exports.registerUser = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ message: 'Email already registered' });
     }
-
-    const user = new User({ username, email, password, role });
-    await user.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, email, password: hashedPassword });
+    await newUser.save();
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -37,6 +38,11 @@ exports.loginUser = async (req, res) => {
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
@@ -66,4 +72,8 @@ exports.updateUserProfile = async (req, res) => {
     console.error('Error updating profile:', error);
     res.status(500).json({ error: 'Server error' });
   }
+};
+
+exports.adminDashboard = (req, res) => {
+  res.send('Admin Dashboard');
 };

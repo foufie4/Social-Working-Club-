@@ -144,6 +144,7 @@
         window.location.href = '/login.html';
       }
     
+<<<<<<< HEAD
       // Function to create a post element
       function createPostElement(post, currentUser) {
         const postElement = document.createElement('div');
@@ -257,10 +258,89 @@
         document.addEventListener('click', (event) => {
           if (!event.target.closest('.comment-actions-menu') && !event.target.closest('.post-actions-menu')) {
             closeAllDropdowns();
+=======
+      const logoutButton = document.getElementById('logoutButton');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function () {
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
+          window.location.href = '/login.html';
+        });
+      }
+    
+      // Modal logic
+      const modal = document.getElementById('profileImageModal');
+      const editProfileImage = document.getElementById('editProfileImage');
+      const span = document.getElementsByClassName('close')[0];
+    
+      if (editProfileImage) {
+        editProfileImage.onclick = function () {
+          modal.style.display = 'block';
+        };
+      }
+    
+      if (span) {
+        span.onclick = function () {
+          modal.style.display = 'none';
+        };
+      }
+    
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = 'none';
+        }
+      };
+    
+      const updateProfileImageForm = document.getElementById('updateProfileImageForm');
+      if (updateProfileImageForm) {
+        updateProfileImageForm.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const profileImageInput = document.getElementById('profileImageInput');
+          const profileImage = profileImageInput ? profileImageInput.files[0] : null;
+    
+          const formData = new FormData();
+          if (profileImage) {
+            formData.append('profileImage', profileImage);
+          }
+    
+          const token = localStorage.getItem('token');
+          if (!token) {
+            alert('Vous devez être connecté pour mettre à jour le profil');
+            return;
+          }
+    
+          try {
+            const response = await fetch('/user/update-profile', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            });
+    
+            if (response.ok) {
+              const data = await response.json();
+              if (data.profileImage) {
+                const profileImage = document.getElementById('profileImage');
+                if (profileImage) {
+                  profileImage.src = `/uploads/${data.profileImage}`;
+                }
+              }
+              modal.style.display = 'none';
+              alert('Image de profil mise à jour avec succès');
+            } else {
+              const errorData = await response.json();
+              alert(errorData.error || "Erreur lors de la mise à jour de l'image de profil");
+            }
+          } catch (error) {
+            console.error("Erreur réseau lors de la mise à jour de l'image de profil:", error);
+            alert("Erreur réseau lors de la mise à jour de l'image de profil");
+>>>>>>> refs/remotes/origin/uxstyle
           }
         });
       }
     
+<<<<<<< HEAD
       function handleLike() {
         const postId = this.getAttribute('data-id');
         const token = localStorage.getItem('token');
@@ -328,6 +408,186 @@
             })
             .catch((error) => console.error('Error commenting on post:', error));
         }
+=======
+      // Handle post creation
+      const createPostForm = document.getElementById('createPostForm');
+      createPostForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const postContent = document.getElementById('postContent').value;
+        const postImage = document.getElementById('postImage').files[0];
+    
+        const formData = new FormData();
+        formData.append('content', postContent);
+        if (postImage) {
+          formData.append('image', postImage);
+        }
+    
+        try {
+          const response = await fetch('/posts/create', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          });
+    
+          if (!response.ok) {
+            throw new Error('Failed to create post');
+          }
+    
+          const newPost = await response.json();
+          const postsContainer = document.getElementById('postsContainer');
+          const postElement = createPostElement(newPost, currentUser);
+          postsContainer.prepend(postElement);
+          // Clear the form
+          createPostForm.reset();
+          attachEventListeners(); // Attach event listeners to the new post
+        } catch (error) {
+          console.error('Error creating post:', error);
+          alert('Failed to create post');
+        }
+      });
+    
+      function createPostElement(post, currentUser) {
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.dataset.id = post._id; // Add this line to set the data-id attribute
+        postElement.innerHTML = `
+        <div class="post-user">
+          <div class="post-user-details">
+            <img src="/uploads/${post.user.profileImage}" alt="${post.user.username}" class="post-user-image">
+            <span class="username">${post.user.username}</span>
+          </div>
+          ${post.user._id === currentUser._id ? `
+            <div class="post-actions-menu">
+              <i class='bx bx-dots-horizontal-rounded'></i>
+              <div class="dropdown-menu">
+                <span class="edit-post" data-id="${post._id}">Modifier</span>
+                <span class="delete-post" data-id="${post._id}">Supprimer</span>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+          <div class="post-content">${he.decode(post.content).replace(/\n/g, '<br>')}</div>
+          <div class="post-actions">
+            <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
+            <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
+          </div>
+          <div class="comments" style="display: none;">
+            <div class="comment-list">
+              ${post.comments.map(comment => `
+                <div class="comment">
+                  <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
+                  <span class="comment-user">${comment.user.username}</span>
+                  <span class="comment-content">${he.decode(comment.content).replace(/\n/g, '<br>')}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="add-comment">
+              <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+              <button class="submit-comment" data-id="${post._id}">Commenter</button>
+            </div>
+          </div>
+        `;
+        if (post.image) {
+          const postImage = document.createElement('img');
+          postImage.src = `/uploads/${he.encode(post.image)}`;
+          postImage.classList.add('post-image');
+          postElement.insertBefore(postImage, postElement.querySelector('.post-actions'));
+        }
+        return postElement;
+    }
+    
+      function attachEventListeners() {
+        document.querySelectorAll('.like').forEach((button) => {
+          button.removeEventListener('click', handleLike);
+          button.addEventListener('click', handleLike);
+        });
+    
+        document.querySelectorAll('.comment').forEach((button) => {
+          button.removeEventListener('click', handleComment);
+          button.addEventListener('click', handleComment);
+        });
+    
+        document.querySelectorAll('.submit-comment').forEach((button) => {
+          button.removeEventListener('click', handleSubmitComment);
+          button.addEventListener('click', handleSubmitComment);
+        });
+    
+        document.querySelectorAll('.post-actions-menu').forEach((menu) => {
+          const dropdown = menu.querySelector('.dropdown-menu');
+          menu.querySelector('i').addEventListener('click', () => {
+            dropdown.classList.toggle('show');
+          });
+        });
+    
+        document.querySelectorAll('.edit-post').forEach((button) => {
+          button.removeEventListener('click', handleEditPost);
+          button.addEventListener('click', handleEditPost);
+        });
+    
+        document.querySelectorAll('.delete-post').forEach((button) => {
+          button.removeEventListener('click', handleDeletePost);
+          button.addEventListener('click', handleDeletePost);
+        });
+      }
+    
+      function handleLike() {
+        const postId = this.getAttribute('data-id');
+        fetch(`/posts/${postId}/like`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((updatedPost) => {
+            this.innerHTML = `<i class='bx bx-like'></i> Like (${updatedPost.likes.length})`;
+          })
+          .catch((error) => console.error('Error liking post:', error));
+      }
+    
+      function handleComment() {
+        const commentsSection = this.closest('.post').querySelector('.comments');
+        commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+      }
+    
+      function handleSubmitComment() {
+        const postId = this.getAttribute('data-id');
+        const commentInput = this.closest('.comments').querySelector('.comment-input');
+        const commentContent = commentInput.value.trim();
+        if (commentContent) {
+          fetch(`/posts/${postId}/comment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ content: he.encode(commentContent) }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Failed to comment on post');
+              }
+              return response.json();
+            })
+            .then((updatedPost) => {
+              const commentsList = this.closest('.comments').querySelector('.comment-list');
+              const newComment = document.createElement('div');
+              newComment.classList.add('comment');
+              const lastComment = updatedPost.comments[updatedPost.comments.length - 1];
+              newComment.innerHTML = `
+                <img src="/uploads/${he.encode(lastComment.user.profileImage)}" alt="${he.encode(lastComment.user.username)}" class="comment-user-image">
+                <span class="comment-user">${he.encode(lastComment.user.username)}</span>
+                <span class="comment-content">${he.encode(lastComment.content)}</span>
+              `;
+              commentsList.appendChild(newComment);
+              commentInput.value = '';
+            })
+            .catch((error) => console.error('Error commenting on post:', error));
+        }
+>>>>>>> refs/remotes/origin/uxstyle
       }
     
       function handleEditPost() {
@@ -387,7 +647,11 @@
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
+<<<<<<< HEAD
               Authorization: `Bearer ${localStorage.getItem('token')}`,
+=======
+              Authorization: `Bearer ${token}`,
+>>>>>>> refs/remotes/origin/uxstyle
             },
           })
             .then((response) => {
@@ -404,6 +668,7 @@
         closeAllDropdowns();
       }
     
+<<<<<<< HEAD
       function handleEditComment() {
         const commentId = this.getAttribute('data-comment-id');
         const commentContentElement = document.querySelector(`.comment[data-comment-id="${commentId}"] .comment-content`);
@@ -476,11 +741,14 @@
         closeAllDropdowns();
       }
 
+=======
+>>>>>>> refs/remotes/origin/uxstyle
       function closeAllDropdowns() {
         document.querySelectorAll('.dropdown-menu').forEach((dropdown) => {
           dropdown.classList.remove('show');
         });
       }
+<<<<<<< HEAD
 
       document.addEventListener('click', (event) => {
         if (!event.target.closest('.comment-actions-menu') && !event.target.closest('.post-actions-menu')) {
@@ -488,6 +756,8 @@
         }
       });
 
+=======
+>>>>>>> refs/remotes/origin/uxstyle
       // Initial attachment of event listeners
       attachEventListeners();
     

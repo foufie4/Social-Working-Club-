@@ -13,9 +13,11 @@ exports.createPost = async (req, res) => {
     const newPost = new Post({
       user: req.user.id,
       content: he.encode(content),
+      content: he.encode(content),
       image
     });
     await newPost.save();
+    await newPost.populate('user', 'username profileImage');
     await newPost.populate('user', 'username profileImage');
     res.status(201).json(newPost);
   } catch (error) {
@@ -33,6 +35,7 @@ exports.getPosts = async (req, res) => {
         select: 'username profileImage'
       }
     });
+    res.status(200).json(posts);
     res.status(200).json(posts);
   } catch (error) {
     console.error('Error fetching posts:', error);
