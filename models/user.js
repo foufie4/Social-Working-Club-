@@ -16,11 +16,19 @@ userSchema.pre('save', async function(next) {
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  console.log('Hashed password in pre-save:', this.password);
   next();
 });
 
+<<<<<<< HEAD
 userSchema.methods.comparePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
+=======
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
+  console.log('Comparing', candidatePassword, 'with', this.password, ':', isMatch);
+  return isMatch;
+>>>>>>> refs/remotes/origin/uxstyle
 };
 
 userSchema.index({ email: 1 });
