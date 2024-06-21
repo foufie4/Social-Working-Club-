@@ -14,7 +14,6 @@ const bcrypt = require('bcrypt');
 const User = require('./models/user');
 const helmet = require('helmet');
 const xss = require('xss-clean');
-const User = require('./models/user'); // Assurez-vous que le modèle User est importé correctement
 
 const UserRoutes = require('./routes/userRoutes');
 const PostRoutes = require('./routes/postRoutes');
@@ -100,7 +99,7 @@ app.get("./login", function (req, res) {
   res.render("login");
 });
 
-app.post("./login", (req, res, next) => {
+app.post("/login", (req, res, next) => {
   console.log(`Attempting to login with email: ${req.body.email} and password: ${req.body.password}`);
   passport.authenticate('local', (err, user, info) => {
       if (err) {
@@ -109,14 +108,14 @@ app.post("./login", (req, res, next) => {
       }
       if (!user) {
           console.log('Authentication failed:', info.message);
-          return res.redirect('./login');
+          return res.redirect('/login');
       }
       req.logIn(user, (err) => {
           if (err) {
               console.error('Login error:', err);
               return next(err);
           }
-          return res.redirect('./profil');
+          return res.redirect('/profil');
       });
   })(req, res, next);
 });

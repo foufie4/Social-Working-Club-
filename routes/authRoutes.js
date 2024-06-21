@@ -17,12 +17,9 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(`Generated hashed password: ${hashedPassword}`);
-
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
-    console.log(`Stored hashed password in DB: ${user.password}`);
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error registering user', error });
@@ -57,5 +54,8 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+// router.post('/register', UserController.registerUser);
+// router.post('/login', UserController.loginUser);
 
 module.exports = router;
