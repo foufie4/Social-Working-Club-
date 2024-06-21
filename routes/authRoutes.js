@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
+const UserController = require('../controllers/userController');
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
@@ -28,6 +29,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Removed the duplicate router.post('/login') definition
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   console.log(`Attempting login with email: ${email} and password: ${password}`);
