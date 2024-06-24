@@ -126,7 +126,7 @@
                     postsContainer.innerHTML = ''; // Clear any existing posts
                     posts.forEach((post) => {
                       const postElement = createPostElement(post, currentUser);
-                      postsContainer.appendChild(postElement);
+                      postsContainer.insertBefore(postElement, postsContainer.firstChild); // Insert at the top
                     });
                     attachEventListeners();
                   }
@@ -143,41 +143,6 @@
       } else {
         window.location.href = '/login.html';
       }
-    
-      const createPostForm = document.getElementById('createPostForm');
-    
-      createPostForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-    
-        const formData = new FormData(createPostForm);
-        const token = localStorage.getItem('token');
-    
-        fetch('/posts/create', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to create post');
-          }
-          return response.json();
-        })
-        .then(post => {
-          // Handle successful post creation by adding the new post to the page
-          console.log('Post created:', post);
-          const postsContainer = document.getElementById('postsContainer');
-          const postElement = createPostElement(post, currentUser);
-          postsContainer.insertBefore(postElement, postsContainer.firstChild);
-          attachEventListeners(); // Reattach event listeners to new elements
-          createPostForm.reset(); // Reset the form after successful submission
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-      });
     
       // Function to create a post element
       function createPostElement(post, currentUser) {
@@ -287,7 +252,7 @@
           button.removeEventListener('click', handleDeletePost);
           button.addEventListener('click', handleDeletePost);
         });
-
+  
         // Close dropdowns when clicking outside
         document.addEventListener('click', (event) => {
           if (!event.target.closest('.comment-actions-menu') && !event.target.closest('.post-actions-menu')) {
@@ -299,7 +264,7 @@
       function handleLike() {
         const postId = this.getAttribute('data-id');
         const token = localStorage.getItem('token');
-
+  
         fetch(`/posts/${postId}/like`, {
           method: 'POST',
           headers: {
@@ -485,7 +450,7 @@
           }
         });
       }
-
+  
       function handleDeleteComment() {
         const commentId = this.getAttribute('data-comment-id');
         if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
@@ -510,30 +475,55 @@
         // Close the dropdown menu
         closeAllDropdowns();
       }
-
+  
       function closeAllDropdowns() {
         document.querySelectorAll('.dropdown-menu').forEach((dropdown) => {
           dropdown.classList.remove('show');
         });
       }
-
+  
       document.addEventListener('click', (event) => {
         if (!event.target.closest('.comment-actions-menu') && !event.target.closest('.post-actions-menu')) {
           closeAllDropdowns();
         }
       });
-
-      // Initial attachment of event listeners
-      attachEventListeners();
-    
-      console.log(document.getElementById('username-sidebar'));
-      console.log(document.getElementById('profileUsername'));
-      console.log(document.getElementById('profileImage'));
-      console.log(document.getElementById('profilePageProfileImage'));
-      console.log(document.getElementById('logoutButton'));
-      console.log(document.getElementById('updateProfileImageForm'));
-      console.log(document.getElementById('profileImageInput'));
+  
+      const createPostForm = document.getElementById('createPostForm');
+  
+      createPostForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+      
+        const formData = new FormData(createPostForm);
+        const token = localStorage.getItem('token');
+      
+        fetch('/posts/create', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to create post');
+          }
+          return response.json();
+        })
+        .then(post => {
+          // Handle successful post creation, e.g., by adding the new post to the page
+          console.log('Post created:', post);
+          const postsContainer = document.getElementById('postsContainer');
+          if (postsContainer) {
+            const postElement = createPostElement(post, currentUser);
+            postsContainer.insertBefore(postElement, postsContainer.firstChild); // Insert at the top
+            attachEventListeners(); // Re-attach event listeners to the new post element
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
     });
-  </script>
+  </script>  
 </body>
 </html>
