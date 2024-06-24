@@ -48,7 +48,7 @@
   <section class="home-section">
     <div class="text">Social Working Club</div>
     <div class="create-post">
-      <form id="createPostForm" enctype="multipart/form-data">
+      <form id="createPostForm" method="POST" enctype="multipart/form-data">
         <div class="input-group">
           <textarea id="postContent" name="content" placeholder="Ecrivez quelque chose..." rows="2"></textarea>
         </div>
@@ -202,6 +202,41 @@
         `;
         return postElement;
       }
+
+      const createPostForm = document.getElementById('createPostForm');
+    
+      createPostForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+    
+        const formData = new FormData(createPostForm);
+        const token = localStorage.getItem('token');
+    
+        fetch('/posts/create', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to create post');
+          }
+          return response.json();
+        })
+        .then(post => {
+          // Handle successful post creation by adding the new post to the page
+          console.log('Post created:', post);
+          const postsContainer = document.getElementById('postsContainer');
+          const postElement = createPostElement(post, currentUser);
+          postsContainer.insertBefore(postElement, postsContainer.firstChild);
+          attachEventListeners(); // Reattach event listeners to new elements
+          createPostForm.reset(); // Reset the form after successful submission
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
       
       function addPostToTop(postElement) {
         const postsContainer = document.getElementById('postsContainer');
