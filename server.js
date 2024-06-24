@@ -55,7 +55,7 @@ const storage = multer.diskStorage({
     cb(null, 'public/uploads/');
   },
   filename: function(req, file, cb) {
-    cb(null, file.fieldname + '-' + path.extname(file.originalname));
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   }
 });
 
@@ -63,23 +63,23 @@ const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } 
 
 app.use('/auth', authRoutes);
 app.use('/user', UserRoutes);
-app.use('/posts', upload.single('image'), PostRoutes);
+app.use('/posts', PostRoutes);
 app.use('/admin', AdminRoutes);
 
-app.get("./index", function (req, res) {
-  res.render("home");
+app.get('/index', function (req, res) {
+  res.render('home');
 });
 
 // Updated /profil route to send static HTML file
-app.get("./profil", isLoggedIn, function (req, res) {
+app.get('/profil', isLoggedIn, function (req, res) {
   res.sendFile(path.join(__dirname, 'public', 'profil.html'));
 });
 
-app.get("./register", function (req, res) {
-  res.render("register");
+app.get('/register', function (req, res) {
+  res.render('register');
 });
 
-app.post("./register", async (req, res) => {
+app.post('/register', async (req, res) => {
   try {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -95,11 +95,11 @@ app.post("./register", async (req, res) => {
   }
 });
 
-app.get("./login", function (req, res) {
-  res.render("login");
+app.get('/login', function (req, res) {
+  res.render('login');
 });
 
-app.post("/login", (req, res, next) => {
+app.post('/login', (req, res, next) => {
   console.log(`Attempting to login with email: ${req.body.email} and password: ${req.body.password}`);
   passport.authenticate('local', (err, user, info) => {
       if (err) {
@@ -156,7 +156,7 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-app.get("./logout", function (req, res) {
+app.get('/logout', function (req, res) {
   req.logout(function(err) {
       if (err) { return next(err); }
       res.redirect('/');
@@ -165,7 +165,7 @@ app.get("./logout", function (req, res) {
 
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
-  res.redirect("./login");
+  res.redirect('/login');
 }
 
 app.get('/', (req, res) => {

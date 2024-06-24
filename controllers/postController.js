@@ -13,7 +13,6 @@ exports.createPost = async (req, res) => {
     const newPost = new Post({
       user: req.user.id,
       content: he.encode(content),
-      content: he.encode(content),
       image
     });
     await newPost.save();

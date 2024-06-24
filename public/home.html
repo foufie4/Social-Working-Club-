@@ -144,6 +144,41 @@
         window.location.href = '/login.html';
       }
     
+      const createPostForm = document.getElementById('createPostForm');
+    
+      createPostForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+    
+        const formData = new FormData(createPostForm);
+        const token = localStorage.getItem('token');
+    
+        fetch('/posts/create', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to create post');
+          }
+          return response.json();
+        })
+        .then(post => {
+          // Handle successful post creation by adding the new post to the page
+          console.log('Post created:', post);
+          const postsContainer = document.getElementById('postsContainer');
+          const postElement = createPostElement(post, currentUser);
+          postsContainer.insertBefore(postElement, postsContainer.firstChild);
+          attachEventListeners(); // Reattach event listeners to new elements
+          createPostForm.reset(); // Reset the form after successful submission
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
+    
       // Function to create a post element
       function createPostElement(post, currentUser) {
         const postElement = document.createElement('div');
