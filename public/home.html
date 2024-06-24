@@ -149,6 +149,7 @@
         const postElement = document.createElement('div');
         postElement.classList.add('post');
         postElement.dataset.id = post._id;
+        const postDate = new Date(post.createdAt).toLocaleString();
         postElement.innerHTML = `
           <div class="post-user">
             <div class="post-user-details">
@@ -171,36 +172,99 @@
             <span class="like" data-id="${post._id}"><i class='bx bx-like'></i> Like (${post.likes.length})</span>
             <span class="comment" data-id="${post._id}"><i class='bx bx-comment'></i> Comment</span>
           </div>
-         <div class="comments" style="display: none;">
-          <div class="comment-list">
-            ${post.comments.map(comment => `
-              <div class="comment" data-comment-id="${comment._id}">
-                <div class="comment-details">
-                  <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
-                  <span class="comment-user">${comment.user.username}</span>
-                  <span class="comment-content">${he.decode(comment.content).replace(/\n/g, '<br>')}</span>
-                </div>
-                ${(comment.user._id === currentUser._id || currentUser.role === 'admin') ? `
-                  <div class="comment-actions-menu">
-                    <i class='bx bx-dots-horizontal-rounded'></i>
-                    <div class="dropdown-menu">
-                      <span class="edit-comment" data-comment-id="${comment._id}">Modifier</span>
-                      <span class="delete-comment" data-comment-id="${comment._id}">Supprimer</span>
-                    </div>
+          <div class="post-date" style="text-align: right;">${postDate}</div>
+          <div class="comments" style="display: none;">
+            <div class="comment-list">
+              ${post.comments.map(comment => `
+                <div class="comment" data-comment-id="${comment._id}">
+                  <div class="comment-details">
+                    <img src="/uploads/${comment.user.profileImage}" alt="${comment.user.username}" class="comment-user-image">
+                    <span class="comment-user">${comment.user.username}</span>
+                    <span class="comment-content">${he.decode(comment.content).replace(/\n/g, '<br>')}</span>
                   </div>
-                ` : ''}
-              </div>
-            `).join('')}
+                  ${(comment.user._id === currentUser._id || currentUser.role === 'admin') ? `
+                    <div class="comment-actions-menu">
+                      <i class='bx bx-dots-horizontal-rounded'></i>
+                      <div class="dropdown-menu">
+                        <span class="edit-comment" data-comment-id="${comment._id}">Modifier</span>
+                        <span class="delete-comment" data-comment-id="${comment._id}">Supprimer</span>
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+            <div class="add-comment">
+              <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+              <button class="submit-comment" data-id="${post._id}">Commenter</button>
+            </div>
           </div>
-          <div class="add-comment">
-            <textarea class="comment-input" placeholder="Add a comment..."></textarea>
-            <button class="submit-comment" data-id="${post._id}">Commenter</button>
-          </div>
-        </div>
         `;
         return postElement;
       }
-    
+      
+      function addPostToTop(postElement) {
+        const postsContainer = document.getElementById('postsContainer');
+        postsContainer.insertBefore(postElement, postsContainer.firstChild);
+      }
+      
+      document.addEventListener('DOMContentLoaded', function () {
+        const createPostForm = document.getElementById('createPostForm');
+      
+        createPostForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+      
+          const formData = new FormData(createPostForm);
+          const token = localStorage.getItem('token');
+      
+          fetch('/posts/create', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to create post');
+            }
+            return response.json();
+          })
+          .then(post => {
+            console.log('Post created:', post);
+            const postElement = createPostElement(post, currentUser);
+            addPostToTop(postElement);
+            attachEventListeners();
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        });
+      
+        // Fetch posts when the page loads
+        fetch('/posts', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => response.json())
+        .then((posts) => {
+          const postsContainer = document.getElementById('postsContainer');
+          if (postsContainer) {
+            postsContainer.innerHTML = ''; // Clear any existing posts
+            posts.reverse(); // Reverse the order of posts to display the most recent first
+            posts.forEach((post) => {
+              const postElement = createPostElement(post, currentUser);
+              postsContainer.appendChild(postElement);
+            });
+            attachEventListeners();
+          }
+        })
+        .catch((error) => console.error('Error fetching posts:', error));
+      });      
+  
       function attachEventListeners() {
         document.querySelectorAll('.like').forEach((button) => {
           button.removeEventListener('click', handleLike);
@@ -487,42 +551,7 @@
           closeAllDropdowns();
         }
       });
-  
-      const createPostForm = document.getElementById('createPostForm');
-  
-      createPostForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-      
-        const formData = new FormData(createPostForm);
-        const token = localStorage.getItem('token');
-      
-        fetch('/posts/create', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to create post');
-          }
-          return response.json();
-        })
-        .then(post => {
-          // Handle successful post creation, e.g., by adding the new post to the page
-          console.log('Post created:', post);
-          const postsContainer = document.getElementById('postsContainer');
-          if (postsContainer) {
-            const postElement = createPostElement(post, currentUser);
-            postsContainer.insertBefore(postElement, postsContainer.firstChild); // Insert at the top
-            attachEventListeners(); // Re-attach event listeners to the new post element
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-      });
+
     });
   </script>  
 </body>

@@ -26,7 +26,7 @@ exports.createPost = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 }).populate('user', 'username profileImage').populate({
+    const posts = await Post.find().sort({ createdAt: 1 }).populate('user', 'username profileImage').populate({
       path: 'comments',
       populate: {
         path: 'user',
