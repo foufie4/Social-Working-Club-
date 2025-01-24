@@ -44,26 +44,42 @@
             </li>
         </ul>
     </div>
+
     <section class="home-section">
         <div class="text">Social Working Club</div>
+
         <div class="profile-container">
             <div class="profile-header">
                 <div class="profile-img-container">
                     <img src="default-profile.png" alt="Profile" class="profile-image" id="profilePageProfileImage">
-                    <i class='bx bx-edit edit-icon' id="editProfileImage"></i>
+                    <!-- <i class='bx bx-edit edit-icon' id="editProfileImage"></i> -->
                 </div>
+
                 <div class="username-container">
                     <div class="username" id="profileUsername"></div>
+                    <p id="profileBio" class="bio">Biographie</p>
                 </div>
+
+                <button id="settingsButton" class="settings-button">
+                    <i class="bx bx-cog"></i>
+                </button>
             </div>
-            <button id="logoutButton">Logout</button>
+
+            <div id="userPosts" class="user-posts">
+                <!-- publications users chargées ici -->
+            </div>
+
+            <button id="logoutButton">Logout</button> <!-- LOGOUT BUTTON TO MOVE DOWN-->
         </div>
 
-        <!-- Modal for profile image upload -->
-        <div id="profileImageModal" class="modal">
+        <!-- modal for editing profile details -->
+        <div id="settingsModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <form id="updateProfileImageForm" enctype="multipart/form-data">
+                <form id="profileSettingsForm">
+
+                <!-- ADD MODIF PARAMETRE ACCOUNT -->
+
                     <label for="profileImageInput">Choisissez une nouvelle image de profil:</label>
                     <input type="file" id="profileImageInput" name="profileImage" accept="image/*">
                     <button type="submit">Save Profile Image</button>

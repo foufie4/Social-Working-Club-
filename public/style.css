@@ -143,6 +143,7 @@
     text-decoration: none;
     transition: all 0.4s ease;
     background: #11101D;
+    border: 1px solid #ccd0d5;
 }
 .sidebar li a:hover{
     background: #FFF;
@@ -226,7 +227,7 @@
 
 .home-section{
     position: relative;
-    background: #c0c9e3;
+    background: #3e3c53;
     min-height: 100vh;
     top: 0;
     left: 78px;
@@ -348,19 +349,21 @@ a {
 }
 
 .create-post {
-    background-color: #fff;
+    background-color: #11101D;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin: 50px;
     display: flex;
     flex-direction: column;
+    border: 1px solid #ccd0d5;
 }
 
 .create-post .input-group textarea {
     width: 100%;
     padding: 20px;
     border: 1px solid #ccd0d5;
+    background-color: #24223a;
     border-radius: 18px;
     resize: none;
 }
@@ -427,6 +430,8 @@ a {
     align-items: flex-start;
     width: 850px;
     position: relative;
+    background-color: #181624;
+    border: 1px solid #ccd0d5;
 }
 
 .post-user {
