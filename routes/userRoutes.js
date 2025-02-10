@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authenticateJWT = require('../middleware/authJWT');
+const authenticateJWT = require('../middleware/authMiddleware');
 const UserController = require('../controllers/userController');
 const multer = require('multer');
 const path = require('path');
@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
       cb(null, 'public/uploads/');
     },
     filename: function(req, file, cb) {
-      cb(null, file.fieldname + '-' + path.extname(file.originalname));
+      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
   });
   
@@ -35,6 +35,14 @@ const storage = multer.diskStorage({
     }
   });
   
-  router.post('/update-profile', authenticateJWT, upload.single('profileImage'), UserController.updateUserProfile);
+  // Route POST pour /update-profile
+router.post('/update-profile', (req, res, next) => {
+  console.log('route atteinte : /update-profile');
+  next();
+},
+  authenticateJWT, // Middleware d'authentification
+  upload.single('profileImage'), // Gestion des fichiers
+  UserController.updateUserProfile // Contrôleur
+);
   
-  module.exports = router;
+module.exports = router;

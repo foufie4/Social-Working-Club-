@@ -20,6 +20,11 @@ const PostRoutes = require('./routes/postRoutes');
 const AdminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 
+app.use('/auth', authRoutes);
+app.use('/user', UserRoutes);
+app.use('/posts', PostRoutes);
+app.use('/admin', AdminRoutes);
+
 const app = express();
 const { MONGO_URI, PORT = 5000, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
 
@@ -60,11 +65,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
-
-app.use('/auth', authRoutes);
-app.use('/user', UserRoutes);
-app.use('/posts', PostRoutes);
-app.use('/admin', AdminRoutes);
 
 app.get('/index', function (req, res) {
   res.render('home');
@@ -199,3 +199,8 @@ const createAdminUser = async () => {
     console.error('Error creating admin user:', error);
   }
 };
+
+app.use((req, res, next) => {
+  console.log(`Requête entrante : ${req.method} ${req.url}`);
+  next();
+});

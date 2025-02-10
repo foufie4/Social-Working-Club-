@@ -54,25 +54,38 @@ exports.loginUser = async (req, res) => {
 };
 
 exports.updateUserProfile = async (req, res) => {
-  const { username } = req.body;
-  const profileImage = req.file ? req.file.filename : null;
+  console.log('Contrôleur appelé');
+  console.log('Body :', req.body);
+  console.log('File :', req.file);
 
   try {
+    const { profileName, profileBio } = req.body;
+    const profileImage = req.file ? req.file.filename : null;
+    //récup l'user depuis la bdd
     const user = await User.findById(req.user.id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'Utilisateur non trouvé'});
     }
 
-    if (username) user.username = username;
-    if (profileImage) user.profileImage = profileImage;
+    //mettre à jour les infos
+    if (profileName) user.username = profileName;
+    if (profileBio) user.bio = profileBio;
+    if (profileImage) user.profileImage = profileImage; //nom du fichier uploadé
 
-    await user.save();
-    res.status(200).json(user);
+    await user.save(); //save dans la bdd
+
+    return res.json({
+      profileName: user.username,
+      profileBio: user.bio,
+      profileImage: user.profileImage,
+    });
   } catch (error) {
-    console.error('Error updating profile:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Erreur lors de la mise à jour du profil:', error);
+    return res.status(500). json({ error: 'Erreur interne du serveur'});
   }
 };
+
+console.log('updateUserProfile appelé avec :', req.body, req.file);
 
 exports.adminDashboard = (req, res) => {
   res.send('Admin Dashboard');
