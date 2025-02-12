@@ -34,6 +34,17 @@ const storage = multer.diskStorage({
       res.status(500).json({ error: 'Server error' });
     }
   });
+
+  router.get('/profile', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+
+        res.json({ bio: user.bio });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error });
+    }
+  });
   
   // Route POST pour /update-profile
 router.post('/update-profile', (req, res, next) => {

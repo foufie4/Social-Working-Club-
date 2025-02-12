@@ -86,7 +86,7 @@
                     <label for="profileImageInput">Choisissez une nouvelle image de profil:</label>
                     <input type="file" id="profileImageInput" name="profileImage" accept="image/*">
 
-                    <button type="submit">Enregistrer</button>
+                    <button type="save-profile">Enregistrer</button>
                 </form>
             </div>
         </div>
@@ -168,10 +168,15 @@
                     if (data.username) {
                         document.getElementById('username-sidebar').textContent = data.username;
                         document.getElementById('profileUsername').textContent = data.username;
-                        document.getElementById('profileBio').textContent = data.bio || "Ajoutez une biographie";
+                        
                         if (data.profileImage) {
                             document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
                             document.getElementById('profilePageProfileImage').src = `/uploads/${data.profileImage}`;
+                        }
+                        if (data.bio && data.bio.trim() !== "") {
+                            document.getElementById('profileBio').textContent = data.bio;
+                        } else {
+                            document.getElementById('profileBio').textContent = data.bio || "Ajoutez une biographie";
                         }
                     } else {
                         window.location.href = '/login.html';
@@ -224,6 +229,7 @@
                 const profileName = document.getElementById('profileName').value;
                 const profileBio = document.getElementById('profileBioInput').value;
                 const profileImage = document.getElementById('profileImageInput').files[0];
+                const token = localStorage.getItem('token');
         
                 const formData = new FormData();
                 formData.append('profileName', profileName);
@@ -231,14 +237,7 @@
                 if (profileImage) {
                     formData.append('profileImage', profileImage);
                 }
-        
-                //token pour l'authentification 
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    alert('Vous devez être connecté pour mettre à jour le profil');
-                    return;
-                }
-        
+
                 try {
                     //envoyer les données au serv
                     const response = await fetch('/user/update-profile', {
@@ -254,7 +253,7 @@
 
                         //mettre à jour les infos sur la page
                         document.getElementById('profileUsername').textContent = data.profileName;
-                        document.getElementById('profileBio').textContent = data.profileBio || 'Aucune biographie disponible';
+                        document.getElementById('profileBio').textContent = profileBio;
                         if (data.profileImage) {
                             document.getElementById('profilePageProfileImage').src = `/uploads/${data.profileImage}`;
                             document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
@@ -274,6 +273,28 @@
                     alert('Erreur réseau lors de la mise à jour du profil');
                 }
             });
+        });
+
+        document.getElementById("save-profile").addEventListener("click", async () => {
+            const newBio = document.getElementById("bio-input").value;
+
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ bio: newBio })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById("profileBio").innerText = newBio;
+                } else {
+                    console.error("Erreur :", data.message);
+                }
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour de la biographie :", error);
+            }
         });
     </script>    
 </body>

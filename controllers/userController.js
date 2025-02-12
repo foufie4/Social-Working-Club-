@@ -54,6 +54,7 @@ exports.loginUser = async (req, res) => {
 };
 
 exports.updateUserProfile = async (req, res) => {
+  console.log('updateUserProfile appelé avec :', req.body, req.file);
   console.log('Contrôleur appelé');
   console.log('Body :', req.body);
   console.log('File :', req.file);
@@ -61,11 +62,20 @@ exports.updateUserProfile = async (req, res) => {
   try {
     const { profileName, profileBio } = req.body;
     const profileImage = req.file ? req.file.filename : null;
+    const userId = req.user.id;
     //récup l'user depuis la bdd
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé'});
     }
+
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      { bio },
+      { new: true}
+    );
+
+    if (!updateUser) return res.status(404).json({ message: "Utilisateur non trouvé"});
 
     //mettre à jour les infos
     if (profileName) user.username = profileName;
@@ -84,8 +94,6 @@ exports.updateUserProfile = async (req, res) => {
     return res.status(500). json({ error: 'Erreur interne du serveur'});
   }
 };
-
-console.log('updateUserProfile appelé avec :', req.body, req.file);
 
 exports.adminDashboard = (req, res) => {
   res.send('Admin Dashboard');

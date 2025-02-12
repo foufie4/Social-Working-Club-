@@ -20,11 +20,6 @@ const PostRoutes = require('./routes/postRoutes');
 const AdminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 
-app.use('/auth', authRoutes);
-app.use('/user', UserRoutes);
-app.use('/posts', PostRoutes);
-app.use('/admin', AdminRoutes);
-
 const app = express();
 const { MONGO_URI, PORT = 5000, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
 
@@ -54,6 +49,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(helmet());
 app.use(xss());
+
+app.use('/auth', authRoutes);
+app.use('/user', UserRoutes);
+app.use('/posts', PostRoutes);
+app.use('/admin', AdminRoutes);
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
