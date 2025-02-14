@@ -66,6 +66,7 @@
   <script defer>
     let sidebar = document.querySelector(".sidebar");
     let closeBtn = document.querySelector("#btn");
+    const API_URL = "http://localhost:5000";
 
     closeBtn.addEventListener("click", () => {
       sidebar.classList.toggle("open");
@@ -88,7 +89,7 @@
       console.log(`Attempting to login with email: ${email} and password: ${password}`);
 
       try {
-        const response = await fetch('/auth/login', {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -109,6 +110,15 @@
         console.error('Error:', error);
         document.getElementById('error-message').innerText = 'An error occurred. Please try again later.';
       }
+
+      fetch(`${API_URL}/api/auth/login`, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    })    
+    .then(res => res.json())
+    .then(console.log)
+    .catch(console.error);
     });
   </script>
 </body>

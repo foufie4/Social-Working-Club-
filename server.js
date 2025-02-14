@@ -23,7 +23,7 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const { MONGO_URI, PORT = 5000, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
 
-mongoose.connect(MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
   socketTimeoutMS: 30000, // Increase socket timeout to 30 seconds
 })
@@ -49,6 +49,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(helmet());
 app.use(xss());
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/auth", authRoutes);
 
 app.use('/auth', authRoutes);
 app.use('/user', UserRoutes);
