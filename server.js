@@ -1,13 +1,16 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
 const express = require('express');
-const morgan = require('morgan');
 const cors = require('cors');
+const { admin, db } = require('./firebaseConfig');
+//importer la clé de service Firebase
+const serviceAccount = require("./firebaseServiceAccountKey.json");
+const bodyParser = require('body-parser');
+
+const morgan = require('morgan');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const passport = require('passport');
-const bodyParser = require('body-parser');
 const session = require('express-session');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
@@ -15,30 +18,31 @@ const User = require('./models/user');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 
-const UserRoutes = require('./routes/userRoutes');
-const PostRoutes = require('./routes/postRoutes');
+const userRoutes = require('./routes/userRoutes');
+const postRoutes = require('./routes/postRoutes');
+
 const AdminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 
+// Initialiser Firebase Admin une seule fois
+if (!admin.apps.length) {
+  admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: "https://your-project-id.firebaseio.com"
+  });
+}
+
 const app = express();
-const { MONGO_URI, PORT = 5000, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+// const { PORT = 5000, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI, {
-  serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
-  socketTimeoutMS: 30000, // Increase socket timeout to 30 seconds
-})
-  .then(() => {
-    console.log('Connected to MongoDB');
-    createAdminUser();
-  })
-  .catch(err => console.error('Error connecting to MongoDB:', err));
-
+//middleware
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(session({secret: 'W1lly_W0nk4', resave: false, saveUninitialized: false}));
+// app.use(session({secret: 'W1lly_W0nk4', resave: false, saveUninitialized: false}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
@@ -52,10 +56,23 @@ app.use(xss());
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/auth", authRoutes);
 
+app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
+
 app.use('/auth', authRoutes);
-app.use('/user', UserRoutes);
-app.use('/posts', PostRoutes);
+app.use('/user', userRoutes);
+app.use('/posts', postRoutes);
 app.use('/admin', AdminRoutes);
+
+app.get('/', (req, res) => {
+  res.send('API Running...');
+});
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
+
+module.exports = { app, db };
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {

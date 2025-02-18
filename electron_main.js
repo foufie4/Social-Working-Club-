@@ -1,22 +1,23 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const { exec } = require('child_process');
-const API_URL = "http://localhost:5000/api";
+
+require('dotenv').config();
+const API_URL = process.env.API_URL || "http://localhost:5000";
 
 let mainWindow;
 
-app.on('ready', () => {
-    // Lancer le serveur Node.js
-    const server = exec('npx kill-port 5000 && node server.js', { cwd: path.join(__dirname, 'Social-Working-Club-') });
+let server = exec('node server.js', (error, stdout, stderr) => {
+    if (error) {
+        console.error(`SERVER ERROR: ${error}`);
+        return;
+    }
+    console.log(`SERVER: ${stdout}`);
+});
 
-    server.stdout.on('data', data => {
-        console.log(`SERVER: ${data}`);
-    });
-
-    server.stderr.on('data', data => {
-        console.error(`SERVER ERROR: ${data}`);
-    });
-
+server.stdout.on('data', (data) => {
+    console.log(`SERVER: ${data}`);
+});
     // Créer la fenêtre Electron
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -28,6 +29,10 @@ app.on('ready', () => {
         }
     });
 
+    setTimeout(() => {
+        mainWindow.loadFile(path.join(__dirname, 'public', 'index.html'));
+    }, 3000); // Attends 3 secondes pour éviter que le serveur ne soit pas prêt    
+
     mainWindow.webContents.executeJavaScript(`window.API_URL = "${API_URL}";`);
 
     // Charger l'interface utilisateur
@@ -37,7 +42,6 @@ app.on('ready', () => {
         mainWindow = null;
         server.kill(); // Arrêter le serveur quand l'app est fermée
     });
-});
 
 app.on('ready', () => {
     console.log("l'application desktop tourne !");

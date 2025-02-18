@@ -1,57 +1,67 @@
 const express = require('express');
-const User = require('../models/user');
+const { db } = require("../firebaseConfig");
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const { JWT_SECRET } = process.env;
-const UserController = require('../controllers/userController');
+// const { JWT_SECRET } = process.env;
+// const UserController = require('../controllers/userController');
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
+
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    // Vérifier si l'utilisateur existe déjà
+    const userRef = db.collection("users").where("email", "==", email);
+    const snapshot = await userRef.get();
+
+    if (!snapshot.empty) {
       return res.status(409).json({ message: 'User already exists' });
     }
 
+    // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, email, password: hashedPassword });
-    await user.save();
+
+    // Enregistrer l'utilisateur dans Firestore
+    const newUser = {
+      username,
+      email,
+      password: hashedPassword,
+      createdAt: new Date()
+    };
+
+    await db.collection("users").add(newUser);
 
     res.status(201).json({ message: 'User registered successfully' });
+
   } catch (error) {
     res.status(500).json({ message: 'Error registering user', error });
   }
 });
 
 // Removed the duplicate router.post('/login') definition
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log(`Attempting login with email: ${email} and password: ${password}`);
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log(`User not found: ${email}`);
-      return res.status(401).json({ error: 'Invalid email or password' });
+    const userRef = db.collection("users").where("email", "==", email);
+    const snapshot = await userRef.get();
+
+    if (snapshot.empty) {
+      return res.status(400).json({ message: "Utilisateur non trouvé" });
     }
 
-    console.log(`User found: ${user.email}`);
-    const validPassword = await user.comparePassword(password);
-    console.log(`Password comparison result: ${validPassword}`);
+    const user = snapshot.docs[0].data(); // Récupérer les données
 
-    if (!validPassword) {
-      console.log(`Invalid password for user: ${email}`);
-      return res.status(401).json({ error: 'Invalid email or password' });
+    // Comparer le mot de passe (ajouter bcrypt si besoin)
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Mot de passe incorrect" });
     }
 
-    const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    res.status(200).json({ message: "Connexion réussie", user });
   } catch (error) {
-    console.log(`Error during login: ${error.message}`);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ message: "Erreur serveur", error });
   }
 });
 

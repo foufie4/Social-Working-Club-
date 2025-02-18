@@ -25,5 +25,6 @@ router.put('/:id', authenticateJWT, PostController.updatePost);
 router.put('/comments/:commentId', authenticateJWT, PostController.updateComment);
 router.delete('/:id', authenticateJWT, checkAdmin, PostController.deletePost); // Apply checkAdmin middleware here
 router.delete('/comments/:commentId', authenticateJWT, PostController.deleteComment);
+router.delete('/post/:id', PostController.deletePost);
 
 module.exports = router;

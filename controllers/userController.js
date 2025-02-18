@@ -1,28 +1,54 @@
-const User = require('../models/user');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = process.env;
+const bcrypt = require("bcrypt");
+const { db } = require('../firebaseConfig');
+// const jwt = require('jsonwebtoken');
+// const { JWT_SECRET } = process.env;
 
+// Création d'un utilisateur dans Firestore
 exports.registerUser = async (req, res) => {
-  const { username, email, password, role } = req.body;
-
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
+  const { username, email, password } = req.body;
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: 'Email already registered' });
+    const userRef = db.collection('users').doc(email);
+    const userDoc = await userRef.get();
+    
+    if (userDoc.exists) {
+      return res.status(409).json({ message: 'User already exists' });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
-    await newUser.save();
+
+    await userRef.set({
+      username,
+      email,
+      password, // Pense à gérer le hash du mot de passe côté frontend
+      createdAt: new Date()
+    });
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: 'Error registering user', error });
+  }
+};
+
+// Récupération des utilisateurs
+exports.getUsers = async (req, res) => {
+  try {
+    const usersSnapshot = await db.collection('users').get();
+    const users = usersSnapshot.docs.map(doc => doc.data());
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Erreur récupération users:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+exports.createUser = async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    const userRef = db.collection('users').doc(email);
+
+    await userRef.set({ username, email, password });
+    res.status(201).json({ message: 'Utilisateur créé' });
+  } catch (error) {
+    console.error('Erreur création utilisateur:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -30,71 +56,78 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+    const userRef = db.collection("users").where("email", "==", email);
+    const snapshot = await userRef.get();
+
+    if (snapshot.empty) {
+      return res.status(400).json({ message: "Utilisateur non trouvé" });
     }
 
-    const isValidPassword = await user.comparePassword(password);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
+    const user = snapshot.docs[0].data(); // Récupérer les données Firestore
 
+    // Comparer le mot de passe hashé
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Mot de passe incorrect" });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login successful', token, username: user.username });
+    res.status(200).json({ message: "Connexion réussie", user });
+
   } catch (error) {
-    console.error('Server error during login:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ message: "Erreur serveur", error });
   }
 };
 
 exports.updateUserProfile = async (req, res) => {
-  console.log('updateUserProfile appelé avec :', req.body, req.file);
-  console.log('Contrôleur appelé');
-  console.log('Body :', req.body);
-  console.log('File :', req.file);
+  console.log("updateUserProfile appelé avec :", req.body, req.file);
 
   try {
     const { profileName, profileBio } = req.body;
     const profileImage = req.file ? req.file.filename : null;
     const userId = req.user.id;
-    //récup l'user depuis la bdd
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ error: 'Utilisateur non trouvé'});
+
+    // Récupérer l'utilisateur depuis Firestore
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
     }
 
-    const updateUser = await User.findByIdAndUpdate(
-      userId,
-      { bio },
-      { new: true}
-    );
+    let updateData = {};
 
-    if (!updateUser) return res.status(404).json({ message: "Utilisateur non trouvé"});
+    if (profileName) updateData.username = profileName;
+    if (profileBio) updateData.bio = profileBio;
+    if (profileImage) updateData.profileImage = profileImage; // Nom du fichier uploadé
 
-    //mettre à jour les infos
-    if (profileName) user.username = profileName;
-    if (profileBio) user.bio = profileBio;
-    if (profileImage) user.profileImage = profileImage; //nom du fichier uploadé
-
-    await user.save(); //save dans la bdd
+    // Mettre à jour l'utilisateur dans Firestore
+    await userRef.update(updateData);
 
     return res.json({
-      profileName: user.username,
-      profileBio: user.bio,
-      profileImage: user.profileImage,
+      profileName: profileName || userDoc.data().username,
+      profileBio: profileBio || userDoc.data().bio,
+      profileImage: profileImage || userDoc.data().profileImage,
     });
+
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du profil:', error);
-    return res.status(500). json({ error: 'Erreur interne du serveur'});
+    console.error("Erreur lors de la mise à jour du profil:", error);
+    return res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
 
-exports.adminDashboard = (req, res) => {
-  res.send('Admin Dashboard');
+exports.adminDashboard = async (req, res) => {
+  try {
+    // Vérifier si l'utilisateur est un administrateur
+    const userRef = db.collection("users").doc(req.user.id);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists || userDoc.data().role !== "admin") {
+      return res.status(403).json({ error: "Accès refusé. Administrateurs uniquement." });
+    }
+
+    res.send("Admin Dashboard");
+  } catch (error) {
+    console.error("Erreur dans l'admin dashboard:", error);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+  }
 };

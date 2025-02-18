@@ -1,0 +1,60 @@
+[{
+  "_id": {
+    "$oid": "66560314f16a334981f61e21"
+  },
+  "username": "Ubby",
+  "email": "black@cat.com",
+  "password": "$2b$10$JzsS4LU7yxrrS7mpfBP27.213gbjJ8ix4RiVH744jz1BIBsIXhzTa",
+  "verified": false,
+  "role": "user",
+  "__v": 0,
+  "profileImage": "profileImage-1717061872588.jpeg"
+},
+{
+  "_id": {
+    "$oid": "6669a7da4fd277e000559582"
+  },
+  "username": "foufie",
+  "email": "foufie@spongebob.com",
+  "password": "$2b$10$Ot9sfDQt4OSghWOv2RHqMeVnsUBhAybLO2EknIRLG1X1NVDHwxwSa",
+  "profileImage": "profileImage-1718201716838.webp",
+  "verified": false,
+  "role": "admin",
+  "createdAt": {
+    "$date": "2024-06-12T13:51:22.622Z"
+  },
+  "updatedAt": {
+    "$date": "2025-02-11T12:15:22.172Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6679756ff922285f689778f5"
+  },
+  "username": "Dwight",
+  "email": "dwight@theoffice.com",
+  "password": "$2b$10$uQBudjNRSqBg5sdYWokmcu7Cv8fJdWUcs8Md9f09vbnDqQ8KBJ1W2",
+  "profileImage": "default-profile.png",
+  "verified": false,
+  "role": "user",
+  "createdAt": {
+    "$date": "2024-06-24T13:32:31.746Z"
+  },
+  "updatedAt": {
+    "$date": "2024-06-24T13:32:31.746Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "665db5add27d0a7397a717ad"
+  },
+  "username": "Jim",
+  "email": "Jim@halpert.com",
+  "password": "$2b$10$mpiNtfy2XrJjuGu/SIVLC.aZHiXNRC68Wn3gG7Gjsnm5AdjjZ/NNm",
+  "profileImage": "profileImage-1718193224100.png",
+  "verified": false,
+  "role": "user",
+  "__v": 0
+}]

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authenticateJWT = require('../middleware/authMiddleware');
 const authMiddleware = require('../middleware/authMiddleware');
+const { getUsers, createUser, loginUser, updateUserProfile } = require('../controllers/userController');
 const UserController = require('../controllers/userController');
 const multer = require('multer');
 const path = require('path');
@@ -18,8 +19,10 @@ const storage = multer.diskStorage({
   
   const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
   
-  router.post('/register', UserController.registerUser);
-  router.post('/login', UserController.loginUser);
+  router.get('/', getUsers);
+  router.post('/register', createUser);
+  router.post('/login', loginUser);
+  router.post('/update-profile', updateUserProfile);
   
   router.get('/me', authenticateJWT, async (req, res) => {
     try {
