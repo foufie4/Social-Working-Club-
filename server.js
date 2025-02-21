@@ -5,7 +5,6 @@ const { admin, db } = require('./firebaseConfig');
 //importer la clé de service Firebase
 const serviceAccount = require("./firebaseServiceAccountKey.json");
 const bodyParser = require('body-parser');
-
 const morgan = require('morgan');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
