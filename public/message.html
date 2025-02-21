@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Syochat</title>
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+  </head>
+  <body>
+    <div id="sidebar-container"></div>
+    
+    <section class="home-section">
+      <section class="message-list">
+        <h2>Messages</h2>
+        <ul>
+            <li class="message-item">
+                <a href="conversation.html?user=Alice">
+                    <img src="avatar1.png" alt="Avatar" class="message-avatar">
+                    <div class="message-info">
+                        <span class="message-username">Alice</span>
+                        <span class="message-preview">Salut, comment ça va ?</span>
+                    </div>
+                </a>
+            </li>
+            <li class="message-item">
+                <a href="conversation.html?user=Bob">
+                    <img src="avatar2.png" alt="Avatar" class="message-avatar">
+                    <div class="message-info">
+                        <span class="message-username">Bob</span>
+                        <span class="message-preview">Tu as reçu mon dernier message ?</span>
+                    </div>
+                </a>
+            </li>
+            <li class="message-item">
+                <a href="conversation.html?user=Charlie">
+                    <img src="avatar3.png" alt="Avatar" class="message-avatar">
+                    <div class="message-info">
+                        <span class="message-username">Charlie</span>
+                        <span class="message-preview">On se voit ce week-end ?</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+      </section>    
+    </section>
+
+    <style>
+      .user-box {
+        display: flex;
+        align-items: center;
+        background: #1e1f22;
+        padding: 15px;
+        border-radius: 8px;
+        width: 350px;
+        gap: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        flex-direction: row;
+        margin: 40px;
+      }
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+
+      .user-info {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .username {
+        font-weight: bold;
+        color: white;
+        display: contents;
+      }
+
+      .status {
+        font-size: 12px;
+        color: #b5b5b5;
+        display: flex;
+        justify-content: flex-end;
+      }
+    </style>
+    
+    <script defer>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+      
+                    // Charge le script de la sidebar APRÈS son ajout au DOM
+                    let script = document.createElement("script");
+                    script.src = "sidebar.js"; // Charge le script qui gère l'interaction
+                    script.defer = true;
+                    script.onload = () => initSidebar(); // Appelle la fonction après le chargement
+                    document.body.appendChild(script);
+                })
+                .catch(error => console.error("Erreur lors du chargement de la sidebar :", error));
+        });
+    </script>
+  </body>
+</html>

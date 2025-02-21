@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Syochat</title>
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+  </head>
+  <body>
+    <div id="sidebar-container"></div>
+
+    <section class="home-section">
+      <div class="text">Créer ton compte !</div>
+      <div class="form-container">
+        <form id="register-form">
+          <h2>Créer un Compte</h2>
+          <div class="input-container">
+            <input type="text" id="username" name="username" required>
+            <label for="username">Nom d'utilisateur</label>
+          </div>
+          <div class="input-container">
+            <input type="text" id="email" name="email" required>
+            <label for="email">E-mail</label>
+          </div>
+          <div class="input-container">
+            <input type="password" id="password" name="password" required>
+            <label for="password">Mot de passe</label>
+          </div>
+          <button type="submit" id="registerButton">S'inscrire</button>
+          <p>Vous avez déjà un compte ? <a href="login.html">Connectez-vous ici.</a></p>
+        </form>
+      </div>
+    </section>
+    <script defer>
+      document.addEventListener("DOMContentLoaded", function() {
+        fetch("sidebar.html")
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById("sidebar-container").innerHTML = html;
+  
+                // Charge le script de la sidebar APRÈS son ajout au DOM
+                let script = document.createElement("script");
+                script.src = "sidebar.js"; // Charge le script qui gère l'interaction
+                script.defer = true;
+                script.onload = () => initSidebar(); // Appelle la fonction après le chargement
+                document.body.appendChild(script);
+            })
+            .catch(error => console.error("Erreur lors du chargement de la sidebar :", error));
+    });
+    </script>
+  </body>
+</html>

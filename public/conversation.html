@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Conversation</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const user = urlParams.get("user");
+            if (user) {
+                document.getElementById("conversation-username").textContent = user;
+                document.getElementById("conversation-avatar").src = user.toLowerCase() + ".png";
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="conversation-header">
+        <img src="avatar-placeholder.png" alt="Avatar" id="conversation-avatar" class="conversation-avatar">
+        <span id="conversation-username">Nom</span>
+        <div class="conversation-actions">
+            <button onclick="callAudio()">📞</button>
+            <button onclick="callVideo()">📹</button>
+            <button onclick="openSettings()">⚙️</button>
+        </div>
+    </div>
+    <div class="conversation-messages" id="messages-container">
+        <!-- Messages dynamiques -->
+    </div>
+    <div class="message-input">
+        <input type="text" id="message-text" placeholder="Écrire un message...">
+        <button onclick="sendMessage()">➤</button>
+    </div>
+    <script>
+        function sendMessage() {
+            let messageText = document.getElementById('message-text').value;
+            if (messageText.trim() !== "") {
+                let messageContainer = document.getElementById('messages-container');
+                let messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.textContent = messageText;
+                messageContainer.appendChild(messageElement);
+                document.getElementById('message-text').value = "";
+            }
+        }
+    </script>
+</body>
+</html>

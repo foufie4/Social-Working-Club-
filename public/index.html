@@ -1,114 +1,44 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Social Working Club</title>
-    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-  </head>
-  <body>
-    <div class="sidebar">
-      <div class="logo-details">
-        <i class='bx bx-menu' id="btn"></i>
-      </div>
-      <ul class="nav-list">
-        <li>
-          <a href="home.html">
-            <i class='bx bx-grid-alt'></i>
-            <span class="links_name">Home</span>
-          </a>
-          <span class="tooltip">Home</span>
-        </li>
-        <li>
-          <a href="profil.html">
-            <i class='bx bx-user'></i>
-            <span class="links_name">Profil</span>
-          </a>
-          <span class="tooltip">Profil</span>
-        </li>
-        <li>
-          <a href="index.html">
-              <i class='bx bx-log-in'></i>
-              <span class="links_name">Connexion</span>
-          </a>
-          <span class="tooltip">Connexion</span>
-        </li>
-        <li class="profile">
-          <div class="profile-details">
-              <img src="profile.jpg" alt="Profile" class="profile">
-              <div class="name_job">
-                  <div class="sidebar-name username" id="username-sidebar"></div>
-              </div>
-          </div>
-      </li>
-      </ul>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Syochat</title>
+  <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+
+  <section class="home-section">
+    <div class="text">Chez les copains !</div>
+    <div class="addServ">
+      <h2>add new serv +</h2>
     </div>
-    <section class="home-section">
-      <div class="text">Social Working Club</div>
-      <div class="form-container">
-        <form id="register-form" action="/auth/register" method="post">
-          <h2>Créer un Compte</h2>
-          <div class="input-container">
-            <input type="text" id="username" name="username" required>
-            <label for="username">Nom d'utilisateur</label>
-          </div>
-          <div class="input-container">
-            <input type="text" id="email" name="email" required>
-            <label for="email">E-mail</label>
-          </div>
-          <div class="input-container">
-            <input type="password" id="password" name="password" required>
-            <label for="password">Mot de passe</label>
-          </div>
-          <button type="submit" id="registerButton">S'inscrire</button>
-          <p>Vous avez déjà un compte ? <a href="login.html">Connectez-vous ici.</a></p>
-          <div id="error-message" style="color: red;"></div>
-        </form>
-      </div>
-    </section>
-    <script defer>
-      let sidebar = document.querySelector(".sidebar");
-      let closeBtn = document.querySelector("#btn");
-    
-      closeBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("open");
-        menuBtnChange();
-      });
-    
-      function menuBtnChange() {
-        if (sidebar.classList.contains("open")) {
-          closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-        } else {
-          closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
-        }
-      }
-    
-      document.getElementById('register-form').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-    
-        try {
-          const response = await fetch('/user/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password })
-          });
-    
-          if (response.ok) {
-            alert('Inscription réussie');
-            window.location.href = '/login.html';
-          } else if (response.status === 409) {
-            alert('Échec de l\'inscription: utilisateur déjà existant');
-          } else {
-            alert('Échec de l\'inscription');
-          }
-        } catch (error) {
-          alert('Erreur lors de l\'inscription');
-        }
-      });
-    </script>
-  </body>
+  </section>
+  
+  <script defer>
+    document.addEventListener("DOMContentLoaded", function() {
+      fetch("sidebar.html")
+          .then(response => response.text())
+          .then(html => {
+              document.getElementById("sidebar-container").innerHTML = html;
+
+              // Charge le script de la sidebar APRÈS son ajout au DOM
+              let script = document.createElement("script");
+              script.src = "sidebar.js"; // Charge le script qui gère l'interaction
+              script.defer = true;
+              script.onload = () => {
+                if (typeof initSidebar === "function") {
+                    initSidebar();
+                } else {
+                    console.error("initSidebar n'est pas défini après le chargement du script.");
+                }
+            };
+            document.body.appendChild(script);
+        })
+        .catch(error => console.error("Erreur lors du chargement de la sidebar :", error));
+    });
+  </script>
+</body>
 </html>

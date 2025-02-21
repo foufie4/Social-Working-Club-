@@ -1,52 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Profil</title>
+    <title>Syochat</title>
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo-details">
-            <i class='bx bx-menu' id="btn"></i>
-        </div>
-        <ul class="nav-list">
-            <li>
-                <a href="home.html">
-                    <i class='bx bx-grid-alt'></i>
-                    <span class="links_name">Home</span>
-                </a>
-                <span class="tooltip">Home</span>
-            </li>
-            <li>
-                <a href="profil.html">
-                    <i class='bx bx-user'></i>
-                    <span class="links_name">Profil</span>
-                </a>
-                <span class="tooltip">Profil</span>
-            </li>
-            <li>
-                <a href="index.html">
-                    <i class='bx bx-log-in'></i>
-                    <span class="links_name">Connexion</span>
-                </a>
-                <span class="tooltip">Connexion</span>
-            </li>
-            <li class="profile">
-                <div class="profile-details">
-                    <img src="default-profile.png" alt="Profile" class="profile" id="profileImage">
-                    <div class="name_job">
-                        <div class="sidebar-name username" id="username-sidebar"></div>
-                    </div>
-                </div>
-            </li>
-        </ul>
-    </div>
+    <div id="sidebar-container"></div>
 
     <section class="home-section">
-        <div class="text">Social Working Club</div>
+        <div class="text">Home Sweet Home</div>
 
         <div class="profile-container">
             <div class="profile-header">
@@ -131,170 +96,41 @@
     </style>
 
     <script defer>
-        document.addEventListener('DOMContentLoaded', function() {
-            let sidebar = document.querySelector(".sidebar");
-            let closeBtn = document.querySelector("#btn"); 
-        
-            closeBtn.addEventListener("click", () => {
-                sidebar.classList.toggle("open");
-                menuBtnChange();
-            });
-        
-            function menuBtnChange() {
-                if (sidebar.classList.contains("open")) {
-                    closeBtn.classList.replace("bx-menu", "bx-menu-alt-right");
-                } else {
-                    closeBtn.classList.replace("bx-menu-alt-right", "bx-menu");
-                }
-            }
-        
-            const token = localStorage.getItem('token');
-        
-            if (token) {
-                fetch('/user/me', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+      
+                    // Charge le script de la sidebar APRÈS son ajout au DOM
+                    let script = document.createElement("script");
+                    script.src = "sidebar.js"; // Charge le script qui gère l'interaction
+                    script.defer = true;
+                    script.onload = () => initSidebar(); // Appelle la fonction après le chargement
+                    document.body.appendChild(script);
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch user data');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.username) {
-                        document.getElementById('username-sidebar').textContent = data.username;
-                        document.getElementById('profileUsername').textContent = data.username;
-                        
-                        if (data.profileImage) {
-                            document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
-                            document.getElementById('profilePageProfileImage').src = `/uploads/${data.profileImage}`;
-                        }
-                        if (data.bio && data.bio.trim() !== "") {
-                            document.getElementById('profileBio').textContent = data.bio;
-                        } else {
-                            document.getElementById('profileBio').textContent = data.bio || "Ajoutez une biographie";
-                        }
-                    } else {
-                        window.location.href = '/login.html';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching user data:', error);
-                    window.location.href = '/login.html';
-                });
-            } else {
-                window.location.href = '/login.html';
-            }
-        
-            document.getElementById('logoutButton').addEventListener('click', function() {
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                window.location.href = '/login.html';
-            });
+                .catch(error => console.error("Erreur lors du chargement de la sidebar :", error));
+        });
         
             // Modal logic
-            const modal = document.getElementById("settingsModal");
-            const settingsButton = document.getElementById("settingsButton");
-            const closeModal = document.querySelector(".close");
-            const form = document.getElementById("profileSettingsForm");
-
-            //modal.style.display = "none";
-        
-            //ouvrir le modal
-            settingsButton.onclick = function() {
-                modal.style.display = "block";
-            }
-        
-            //fermer le modal
-            closeModal.onclick = function() {
-                modal.style.display = "none";
-            }
-        
-            //fermer en cliquant en dehors
-            window.onclick = function (event) {
-                if (event.target === modal) {
+            document.addEventListener("DOMContentLoaded", function() {
+                const modal = document.getElementById("settingsModal");
+                const settingsButton = document.getElementById("settingsButton");
+                const closeModal = document.querySelector(".close");
+            
+                settingsButton.onclick = function() {
+                    modal.style.display = "block";
+                }
+            
+                closeModal.onclick = function() {
                     modal.style.display = "none";
                 }
-            }
-        
-            //soumission du formulaire
-            form.addEventListener('submit', async function (e) {
-                e.preventDefault(); //empeche le rechargement de la page
-
-                //récupérer les données du formulaire
-                const profileName = document.getElementById('profileName').value;
-                const profileBio = document.getElementById('profileBioInput').value;
-                const profileImage = document.getElementById('profileImageInput').files[0];
-                const token = localStorage.getItem('token');
-        
-                const formData = new FormData();
-                formData.append('profileName', profileName);
-                formData.append('profileBio', profileBio);
-                if (profileImage) {
-                    formData.append('profileImage', profileImage);
-                }
-
-                try {
-                    //envoyer les données au serv
-                    const response = await fetch('/user/update-profile', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}` //auth avec le token
-                        },
-                        body: formData //contient les données du form
-                    });
-        
-                    if (response.ok) {
-                        const data = await response.json();
-
-                        //mettre à jour les infos sur la page
-                        document.getElementById('profileUsername').textContent = data.profileName;
-                        document.getElementById('profileBio').textContent = profileBio;
-                        if (data.profileImage) {
-                            document.getElementById('profilePageProfileImage').src = `/uploads/${data.profileImage}`;
-                            document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
-                        }
-
-                        //fermer le modal
+            
+                window.onclick = function (event) {
+                    if (event.target === modal) {
                         modal.style.display = "none";
-
-                        alert('Profil mis à jour avec succès !');
-                    } else {
-                        const errorData = await response.json();
-                        console.error('Erreur: ', errorData);
-                        alert(errorData.error || 'Erreur lors de la mise à jour du profil.');
                     }
-                } catch (error) {
-                    console.error('Erreur réseau lors de la mise à jour du profil : ', error);
-                    alert('Erreur réseau lors de la mise à jour du profil');
                 }
-            });
-        });
-
-        document.getElementById("save-profile").addEventListener("click", async () => {
-            const newBio = document.getElementById("bio-input").value;
-
-            try {
-                const response = await fetch('/api/user/profile', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ bio: newBio })
-                });
-
-                const data = await response.json();
-                if (response.ok) {
-                    document.getElementById("profileBio").innerText = newBio;
-                } else {
-                    console.error("Erreur :", data.message);
-                }
-            } catch (error) {
-                console.error("Erreur lors de la mise à jour de la biographie :", error);
-            }
         });
     </script>    
 </body>
