@@ -16,8 +16,8 @@
           <h2>Let's talk together</h2>
           <h3>Épinglées</h3>
             <div class="pinned">
-                <div class="chat-item">
-                    <img src="avatar.png" alt="User Avatar">
+                <div class="chat-item" data-id="1">
+                    <img src="img/account.png" alt="User Avatar">
                     <div class="chat-info">
                         <span class="name">John Doe</span>
                         <span class="preview">Lorem ipsum dolor ...</span>
@@ -27,18 +27,18 @@
             </div>
             <h3>Conversations</h3>
             <div class="chat-list">
-                <div class="chat-item">
-                    <img src="avatar.png" alt="User Avatar">
+                <div class="chat-item" data-id="2">
+                    <img src="img/account.png" alt="User Avatar">
                     <div class="chat-info">
-                        <span class="name">John Doe</span>
+                        <span class="name">Alice Doe</span>
                         <span class="preview">Lorem ipsum dolor ...</span>
                     </div>
                     <span class="time">12:00</span>
                 </div>
-                <div class="chat-item">
-                    <img src="avatar.png" alt="User Avatar">
+                <div class="chat-item" data-id="3">
+                    <img src="img/account.png" alt="User Avatar">
                     <div class="chat-info">
-                        <span class="name">John Doe</span>
+                        <span class="name">Francis Doe</span>
                         <span class="preview">Lorem ipsum dolor ...</span>
                     </div>
                     <span class="time">18:00</span>
@@ -49,12 +49,12 @@
         <!-- Zone des messages -->
         <main class="chat-window">
           <header class="chat-header">
-            <img src="avatar.png" alt="User Avatar">
+            <img src="img/account.png" alt="User Avatar">
             <span class="chat-name">John Doe</span>
             <div class="chat-actions">
-              <button>📹</button>
-              <button>📞</button>
-              <button>⋮</button>
+              <button class="headConv"><img src="img/callcam.png" alt="callCam"></button>
+              <button class="headConv"><img src="img/callph.png" alt="callPhone"></button>
+              <button class="headConv"><img src="img/menuconv.png" alt="menuConv"></button>
             </div>
           </header>
           <div class="chat-messages">
@@ -79,141 +79,6 @@
           </main>
         </div>
     </section>
-
-
-    <style>
-      .container {
-        display: flex;
-        width: 100%;
-        height: 100vh;
-    }
-    
-    /* Bloc englobant */
-    .blocmsg {
-        width: 300px;  /* Plus large que la sidebar */
-        background: #1a1a2e;
-        padding: 15px;
-        position: relative;  /* Pour gérer l'effet de profondeur */
-        box-shadow: 5px 0 10px rgba(0, 0, 0, 0.2);
-    }
-    /* Effet de sidebar élargie */
-    .sidebar.open {
-        width: 250px;
-    }
-    .chat-item {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      border-bottom: 1px solid #555;
-    }
-    .chat-item img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
-    }
-    .chat-window {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        background: #f5f5f5;
-    }
-    .chat-header {
-        background: #444;
-        color: white;
-        padding: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .chat-header img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
-    }
-    .chat-messages {
-        flex: 1;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-    }
-    .message {
-      max-width: 70%;
-      padding: 12px 15px;
-      border-radius: 18px;
-      margin: 10px 0;
-      font-size: 1em;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    .message-sent {
-        max-width: 60%;
-        padding: 10px;
-        border-radius: 10px;
-        margin: 5px 0;
-        display: flex;
-        position: relative;
-        flex-wrap: wrap;
-        align-self: flex-end;
-        background: #5865f2;
-        color:white;
-        text-align: right;
-    }
-    .message-received {
-      max-width: 60%;
-      padding: 10px;
-      border-radius: 10px;
-      margin: 5px 0;
-      display: flex;
-      position: relative;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      background: #333;
-      color: white;
-      text-align: left;
-    }
-    .timestamp {
-        font-size: 0.8em;
-        color: #ccc;
-        position: absolute;
-        bottom: 5px;
-        right: 10px;
-    }
-    .chat-footer {
-        display: flex;
-        padding: 10px;
-        background: #eee;
-        align-items: center;
-    }
-    .chat-footer input {
-        flex: 1;
-        padding: 8px;
-        border-radius: 90px;
-        border: none;
-        block-size: 50px;
-        width: 999px;
-    }
-    .chat-footer button {
-        background: none;
-        border: none;
-        font-size: 18px;
-        cursor: pointer;
-        margin-left: 5px;
-        width: 60px;
-    }
-
-    .chat-actions button {
-      border-radius: 5px;
-      width: 60px;
-    }
-
-    .chat-name {
-      left: 40px;
-    }
-    </style>
     
     <script defer>
         document.addEventListener("DOMContentLoaded", function() {
@@ -230,6 +95,62 @@
                     document.body.appendChild(script);
                 })
                 .catch(error => console.error("Erreur lors du chargement de la sidebar :", error));
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+          const conversations = {
+            1: {
+              name: "John Doe",
+              avatar: "img/account.png",
+              message: [
+                { type: "received", text: "Salut, ça va ?", time: "15:00" },
+                { type: "send", type: "Oui et toi ?", time: "15h05 "}
+              ]
+            },
+            2: {
+              name: "Alice Doe",
+              avatar: "img/account.png",
+              messages: [
+                { type: "received", text: "Coucou, tu es dispo ?", time: "16:00" },
+                { type: "sent", text: "Oui, que se passe-t-il ?", time: "16:10" }
+              ]
+            },
+            3: {
+              name: "Francis Doe",
+              avatar: "img/account.png",
+              messages: [
+                { type: "received", text: "South park ce soir ?", time: "17:00" },
+                { type: "sent", text: "Oh ouais chaud !", time: "17:10" }
+              ]
+            }
+          };
+
+          document.querySelectorAll(".chat-item").forEach(item => {
+            item.addEventListener("click", function() {
+                const chatId = this.getAttribute("data-id");
+                if (!conversations[chatId]) return;
+
+                const chatData = conversations[chatId];
+
+                // Met à jour l'en-tête de la conversation
+                document.querySelector(".chat-header img").src = chatData.avatar;
+                document.querySelector(".chat-header .chat-name").textContent = chatData.name;
+
+                // Met à jour les messages
+                const chatMessages = document.querySelector(".chat-messages");
+                chatMessages.innerHTML = "";
+
+                chatData.messages.forEach(msg => {
+                    const messageElement = document.createElement("div");
+                    messageElement.classList.add("message", `message-${msg.type}`);
+                    messageElement.innerHTML = `
+                        <p>${msg.text}</p>
+                        <span class="timestamp">${msg.time}</span>
+                    `;
+                    chatMessages.appendChild(messageElement);
+                });
+            });
+          });
         });
     </script>
   </body>
